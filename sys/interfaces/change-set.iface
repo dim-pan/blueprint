@@ -1,0 +1,10 @@
+interface ChangeSet {
+  affected_components: String[]
+  changes:             Change[]
+}
+
+interface Change {
+  file:        String
+  element_id:  String
+  change_type: added | modified | removed
+}

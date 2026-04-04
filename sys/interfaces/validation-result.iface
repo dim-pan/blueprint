@@ -1,0 +1,11 @@
+interface ValidationResult {
+  valid:  Boolean
+  errors: ValidationError[]
+}
+
+interface ValidationError {
+  message:     String
+  source_file: String
+  line_number: Integer
+  severity:    error | warning
+}

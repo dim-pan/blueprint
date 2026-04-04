@@ -44,3 +44,9 @@ req BP-006 "Coverage analysis"
   WHEN the user requests verification,
   the system shall identify any requirements not covered
   by at least one test specification.
+
+req BP-009 "Visual model representation"
+  priority: should-have
+  WHEN the user requests a visual view of the system model,
+  the system shall display the components, their dependencies,
+  interfaces, and traceability links in a graphical format.

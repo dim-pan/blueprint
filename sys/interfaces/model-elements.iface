@@ -1,0 +1,47 @@
+interface Requirement {
+  id:          String
+  title:       String
+  priority:    must-have | should-have | nice-to-have
+  pattern:     ubiquitous | event-driven | unwanted | state-driven | optional
+  statement:   String
+  accept:      AcceptanceCriterion[]
+  source_file: String
+  line_number: Integer
+}
+
+interface AcceptanceCriterion {
+  description: String
+}
+
+interface Component {
+  name:           String
+  responsibility: String
+  depends_on:     String[]
+  satisfies:      String[]
+  source_file:    String
+  line_number:    Integer
+}
+
+interface InterfaceDefinition {
+  name:        String
+  fields:      Field[]
+  source_file: String
+  line_number: Integer
+}
+
+interface Field {
+  name:     String
+  type:     String
+  optional: Boolean
+}
+
+interface TestSpec {
+  id:          String
+  title:       String
+  verifies:    String[]
+  given:       String
+  when:        String?
+  expect:      String
+  source_file: String
+  line_number: Integer
+}

@@ -1,0 +1,6 @@
+interface AgentContext {
+  component:    Component
+  interfaces:   InterfaceDefinition[]
+  requirements: Requirement[]
+  test_specs:   TestSpec[]
+}

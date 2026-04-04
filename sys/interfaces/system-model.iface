@@ -1,0 +1,6 @@
+interface SystemModel {
+  requirements: Requirement[]
+  components:   Component[]
+  interfaces:   InterfaceDefinition[]
+  test_specs:   TestSpec[]
+}

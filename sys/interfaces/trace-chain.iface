@@ -1,0 +1,14 @@
+interface TraceChain {
+  requirement_id: String
+  satisfied_by:   String[]
+  verified_by:    String[]
+}
+
+interface TraceQuery {
+  from_id:   String
+  direction: forward | backward
+}
+
+interface TraceResult {
+  chains: TraceChain[]
+}

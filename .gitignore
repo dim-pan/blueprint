@@ -2,5 +2,7 @@
 resources/*.pdf
 resources/*.txt
 
-# Generated code (artifact, not source of truth)
-src/
+# Generated code — tracked for now so the repo is cloneable and runnable.
+# The system model (sys/) is authoritative. When blueprint can self-host,
+# src/ may become gitignored and regenerated as a build step.
+# src/

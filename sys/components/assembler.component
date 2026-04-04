@@ -1,8 +1,9 @@
 component Assembler
-  responsibility: Resolve the validated system model into a complete
-                  context suitable for consumption by an AI coding
-                  agent. For each component, assemble its interfaces,
+  responsibility: Resolve the validated system model into context
+                  suitable for consumption by an AI coding agent.
+                  For each affected component, assemble its interfaces,
                   allocated requirements, and linked test specifications
-                  into a single coherent output.
-  depends_on: Parser, Validator
-  satisfies: BP-004
+                  into a single coherent output. Only assemble context
+                  for components affected by model changes.
+  depends_on: Parser, Validator, ChangeDetector
+  satisfies: BP-004, BP-008

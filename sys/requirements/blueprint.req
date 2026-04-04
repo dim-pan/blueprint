@@ -18,8 +18,21 @@ req BP-003 "Validation error reporting"
 req BP-004 "Agent context generation"
   priority: must-have
   WHEN the user requests context assembly,
-  the system shall produce a complete, resolved context
-  suitable for consumption by an AI coding agent.
+  the system shall produce a resolved context for each
+  affected component, suitable for consumption by an
+  AI coding agent.
+
+req BP-007 "Change detection"
+  priority: must-have
+  WHEN the system model has changed since the last sync,
+  the system shall identify which components are affected
+  by the change.
+
+req BP-008 "Incremental sync"
+  priority: must-have
+  WHEN the user requests a sync,
+  the system shall regenerate only the components affected
+  by model changes, not the entire codebase.
 
 req BP-005 "Traceability"
   priority: must-have

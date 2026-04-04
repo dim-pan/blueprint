@@ -1,0 +1,212 @@
+## BP-001: System model definition
+
+test TC-SYS-001 "Parse valid system model"
+  verifies: BP-001
+  given: a sys/ directory containing valid .req, .iface,
+         .component, and .testspec files
+  expect: a structured SystemModel with all elements populated
+          and no errors
+
+test TC-SYS-002 "Reject non-text model files"
+  verifies: BP-001
+  given: a sys/ directory containing a binary file with a
+         .req extension
+  expect: a syntax error reported with file path and description
+
+test TC-SYS-003 "Handle empty model directory"
+  verifies: BP-001
+  given: a sys/ directory with no model files
+  expect: a valid but empty SystemModel with no errors
+
+## BP-002: Model validation
+
+test TC-SYS-004 "Valid model passes validation"
+  verifies: BP-002
+  given: a SystemModel where all cross-references resolve
+  expect: ValidationResult{valid: true, errors: []}
+
+test TC-SYS-005 "Broken satisfies reference detected"
+  verifies: BP-002
+  given: a component with satisfies: REQ-NONEXISTENT
+  expect: ValidationResult{valid: false} with an error
+         referencing the broken link
+
+test TC-SYS-006 "Broken verifies reference detected"
+  verifies: BP-002
+  given: a test spec with verifies: REQ-NONEXISTENT
+  expect: ValidationResult{valid: false} with an error
+         referencing the broken link
+
+test TC-SYS-007 "Broken depends_on reference detected"
+  verifies: BP-002
+  given: a component with depends_on: COMP-NONEXISTENT
+  expect: ValidationResult{valid: false} with an error
+         referencing the broken link
+
+## BP-003: Validation error reporting
+
+test TC-SYS-008 "Errors include file and line number"
+  verifies: BP-003
+  given: a SystemModel with a broken reference on line 5
+         of components/parser/parser.component
+  expect: ValidationError with source_file containing
+         "parser.component" and line_number: 5
+
+test TC-SYS-009 "Non-zero exit on validation failure"
+  verifies: BP-003
+  given: a SystemModel with at least one validation error
+  when: validation is invoked
+  expect: process exits with non-zero status
+
+test TC-SYS-010 "Zero exit on validation success"
+  verifies: BP-003
+  given: a SystemModel with no validation errors
+  when: validation is invoked
+  expect: process exits with zero status
+
+## BP-004: Agent context generation
+
+test TC-SYS-011 "Assemble context for a single component"
+  verifies: BP-004
+  given: a valid SystemModel with one component COMP-001
+         that satisfies REQ-001, consumes InterfaceA,
+         and is verified by TC-001
+  when: context assembly is requested for COMP-001
+  expect: AgentContext containing the component definition,
+         REQ-001, InterfaceA, and TC-001
+
+test TC-SYS-012 "Context includes parent system requirements"
+  verifies: BP-004
+  given: a component with derived requirement BP-001-P01
+         (derived_from: BP-001)
+  when: context is assembled for that component
+  expect: AgentContext includes both BP-001-P01 and BP-001
+
+test TC-SYS-013 "Context resolves interface references"
+  verifies: BP-004
+  given: a component that consumes InterfaceA, which
+         references InterfaceB in a field type
+  when: context is assembled for that component
+  expect: AgentContext includes both InterfaceA and InterfaceB
+
+## BP-005: Traceability
+
+test TC-SYS-014 "Forward trace from requirement"
+  verifies: BP-005
+  given: REQ-001 satisfied by COMP-001, verified by TC-001
+  when: forward trace is requested for REQ-001
+  expect: TraceResult showing COMP-001 in satisfied_by
+         and TC-001 in verified_by
+
+test TC-SYS-015 "Backward trace from test spec"
+  verifies: BP-005
+  given: TC-001 verifies REQ-001
+  when: backward trace is requested for TC-001
+  expect: TraceResult showing REQ-001 as the traced requirement
+
+test TC-SYS-016 "Trace follows derived_from chain"
+  verifies: BP-005
+  given: BP-001-P01 derived_from BP-001
+  when: backward trace is requested for BP-001-P01
+  expect: TraceResult includes BP-001 as the root
+         system requirement
+
+test TC-SYS-017 "Full traceability matrix"
+  verifies: BP-005
+  given: a valid SystemModel with requirements, components,
+         and test specs
+  when: full traceability matrix is requested
+  expect: every requirement appears with its satisfying
+         components and verifying test specs
+
+## BP-006: Coverage analysis
+
+test TC-SYS-018 "Detect uncovered requirement"
+  verifies: BP-006
+  given: REQ-001 has no test spec with verifies: REQ-001
+  when: coverage analysis is requested
+  expect: CoverageReport with REQ-001 in uncovered_requirements
+
+test TC-SYS-019 "Detect unallocated requirement"
+  verifies: BP-006
+  given: REQ-001 has no component with satisfies: REQ-001
+  when: coverage analysis is requested
+  expect: CoverageReport with REQ-001 in uncovered_requirements
+
+test TC-SYS-020 "Full coverage reports 100%"
+  verifies: BP-006
+  given: every requirement is verified by at least one test spec
+  when: coverage analysis is requested
+  expect: CoverageReport{coverage_percentage: 100.0,
+         uncovered_requirements: []}
+
+test TC-SYS-021 "Coverage metrics are accurate"
+  verifies: BP-006
+  given: 4 requirements, 3 covered by test specs, 1 uncovered
+  when: coverage analysis is requested
+  expect: CoverageReport{total_requirements: 4,
+         covered_requirements: 3, coverage_percentage: 75.0}
+
+## BP-007: Change detection
+
+test TC-SYS-022 "Detect added model element"
+  verifies: BP-007
+  given: a new .req file added since the last sync
+  expect: ChangeSet includes the new requirement as
+         change_type: added
+
+test TC-SYS-023 "Detect modified model element"
+  verifies: BP-007
+  given: an existing .component file modified since the last sync
+  expect: ChangeSet includes the component as
+         change_type: modified
+
+test TC-SYS-024 "Detect removed model element"
+  verifies: BP-007
+  given: a .req file removed since the last sync
+  expect: ChangeSet includes the requirement as
+         change_type: removed
+
+test TC-SYS-025 "Transitive impact detection"
+  verifies: BP-007
+  given: InterfaceA is modified, COMP-001 consumes InterfaceA,
+         COMP-002 depends_on COMP-001
+  expect: ChangeSet affected_components includes both
+         COMP-001 and COMP-002
+
+## BP-008: Incremental sync
+
+test TC-SYS-026 "Sync regenerates only affected components"
+  verifies: BP-008
+  given: COMP-001 is in the ChangeSet, COMP-003 is not
+  when: sync is requested
+  expect: context is assembled for COMP-001 only,
+         COMP-003 is untouched
+
+test TC-SYS-027 "Sync with no changes is a no-op"
+  verifies: BP-008
+  given: no model files changed since the last sync
+  when: sync is requested
+  expect: ChangeSet{affected_components: [], changes: []}
+         and no context is assembled
+
+## BP-009: Visual model representation
+
+test TC-SYS-028 "Visual output includes all components"
+  verifies: BP-009
+  given: a SystemModel with 3 components
+  when: visual representation is requested
+  expect: output contains all 3 components with their names
+
+test TC-SYS-029 "Visual output shows dependencies"
+  verifies: BP-009
+  given: COMP-002 depends_on COMP-001
+  when: visual representation is requested
+  expect: output shows a dependency link from COMP-002
+         to COMP-001
+
+test TC-SYS-030 "Visual output shows traceability"
+  verifies: BP-009
+  given: COMP-001 satisfies REQ-001, TC-001 verifies REQ-001
+  when: visual representation is requested
+  expect: output shows satisfy and verify links

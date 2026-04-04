@@ -1,0 +1,46 @@
+req BP-CLI-01 "Validate command"
+  derived_from: BP-002
+  allocated_to: COMP-007
+  priority: must-have
+  WHEN the user runs the validate command,
+  the CLI shall invoke the Parser and Validator and
+  display the results to the user.
+
+req BP-CLI-02 "Assemble command"
+  derived_from: BP-004
+  allocated_to: COMP-007
+  priority: must-have
+  WHEN the user runs the assemble command,
+  the CLI shall invoke the Parser, Validator, and
+  Assembler and write the generated context to disk.
+
+req BP-CLI-03 "Sync command"
+  derived_from: BP-008
+  allocated_to: COMP-007
+  priority: must-have
+  WHEN the user runs the sync command,
+  the CLI shall invoke the ChangeDetector and Assembler
+  and regenerate only the affected components.
+
+req BP-CLI-04 "Trace command"
+  derived_from: BP-005
+  allocated_to: COMP-007
+  priority: must-have
+  WHEN the user runs the trace command with an element id,
+  the CLI shall invoke the Tracer and display the
+  traceability chain for that element.
+
+req BP-CLI-05 "Verify command"
+  derived_from: BP-006
+  allocated_to: COMP-007
+  priority: must-have
+  WHEN the user runs the verify command,
+  the CLI shall invoke the CoverageAnalyser and display
+  the coverage report.
+
+req BP-CLI-06 "Model directory option"
+  derived_from: BP-001
+  allocated_to: COMP-007
+  priority: must-have
+  The CLI shall accept a path to the system model directory,
+  defaulting to sys/ in the current working directory.

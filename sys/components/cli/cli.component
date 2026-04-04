@@ -1,5 +1,5 @@
-component CLI
+component COMP-007 "CLI"
   responsibility: Expose all system operations to the user via a
                   command-line interface. Route user commands to the
                   appropriate components and present results.
-  depends_on: Parser, Validator, Assembler, Tracer, CoverageAnalyser
+  depends_on: COMP-001, COMP-002, COMP-003, COMP-004, COMP-005

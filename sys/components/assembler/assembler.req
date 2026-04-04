@@ -1,0 +1,33 @@
+req BP-004-A01 "Assemble component context"
+  derived_from: BP-004
+  allocated_to: COMP-003
+  priority: must-have
+  WHEN context is requested for a component,
+  the Assembler shall produce a single output containing
+  the component definition, its allocated requirements,
+  the interfaces it consumes and produces, and the test
+  specifications that verify its requirements.
+
+req BP-004-A02 "Resolve interface references"
+  derived_from: BP-004
+  allocated_to: COMP-003
+  priority: must-have
+  The Assembler shall resolve all interface type references
+  to their full definitions, so the output is self-contained
+  with no unresolved references.
+
+req BP-004-A03 "Include system requirement intent"
+  derived_from: BP-004
+  allocated_to: COMP-003
+  priority: must-have
+  The Assembler shall include the parent system requirements
+  for each component-level requirement, so the AI agent
+  understands the intent behind the derived requirements.
+
+req BP-008-A01 "Assemble only affected components"
+  derived_from: BP-008
+  allocated_to: COMP-003
+  priority: must-have
+  WHEN a sync is requested, the Assembler shall produce
+  context only for the components identified as affected
+  by the ChangeDetector.

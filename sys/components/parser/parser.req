@@ -1,0 +1,65 @@
+req BP-001-P01 "Parse requirement files"
+  derived_from: BP-001
+  allocated_to: COMP-001
+  priority: must-have
+  WHEN the Parser receives a .req file,
+  it shall extract each requirement definition with its id,
+  title, priority, EARS pattern, statement, and acceptance
+  criteria.
+
+req BP-001-P02 "Parse interface files"
+  derived_from: BP-001
+  allocated_to: COMP-001
+  priority: must-have
+  WHEN the Parser receives a .iface file,
+  it shall extract each interface definition with its name,
+  fields, field types, and optionality.
+
+req BP-001-P03 "Parse component files"
+  derived_from: BP-001
+  allocated_to: COMP-001
+  priority: must-have
+  WHEN the Parser receives a .component file,
+  it shall extract the component name, responsibility,
+  dependencies, and satisfies references.
+
+req BP-001-P04 "Parse test specification files"
+  derived_from: BP-001
+  allocated_to: COMP-001
+  priority: must-have
+  WHEN the Parser receives a .testspec file,
+  it shall extract each test specification with its id, title,
+  verifies references, given/when/expect clauses.
+
+req BP-001-P05 "Parse derived requirement files"
+  derived_from: BP-001
+  allocated_to: COMP-001
+  priority: must-have
+  WHEN the Parser receives a derived .req file within a
+  component folder, it shall extract each requirement with
+  its id, derived_from reference, allocated_to reference,
+  priority, and statement.
+
+req BP-001-P06 "Preserve source locations"
+  derived_from: BP-001
+  allocated_to: COMP-001
+  priority: must-have
+  The Parser shall record the source file path and line
+  number for every parsed element.
+
+req BP-001-P07 "Syntax error reporting"
+  derived_from: BP-001
+  allocated_to: COMP-001
+  priority: must-have
+  IF a model file contains a syntax error,
+  THEN the Parser shall report the error with file path,
+  line number, and a description of the expected syntax.
+
+req BP-001-P08 "Directory traversal"
+  derived_from: BP-001
+  allocated_to: COMP-001
+  priority: must-have
+  WHEN given a system model directory,
+  the Parser shall discover and parse all model files by
+  traversing sys/requirements/, sys/interfaces/,
+  sys/components/, and sys/tests/.

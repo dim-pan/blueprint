@@ -1,9 +1,9 @@
-component Assembler
+component COMP-003 "Assembler"
   responsibility: Resolve the validated system model into context
                   suitable for consumption by an AI coding agent.
                   For each affected component, assemble its interfaces,
                   allocated requirements, and linked test specifications
                   into a single coherent output. Only assemble context
                   for components affected by model changes.
-  depends_on: Parser, Validator, ChangeDetector
+  depends_on: COMP-001, COMP-002, COMP-006
   satisfies: BP-004, BP-008

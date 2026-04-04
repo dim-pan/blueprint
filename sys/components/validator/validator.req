@@ -1,0 +1,69 @@
+req BP-002-V01 "Validate satisfies references"
+  derived_from: BP-002
+  allocated_to: COMP-002
+  priority: must-have
+  The Validator shall check that every satisfies reference
+  in a component resolves to an existing requirement id.
+
+req BP-002-V02 "Validate verifies references"
+  derived_from: BP-002
+  allocated_to: COMP-002
+  priority: must-have
+  The Validator shall check that every verifies reference
+  in a test specification resolves to an existing
+  requirement id.
+
+req BP-002-V03 "Validate derived_from references"
+  derived_from: BP-002
+  allocated_to: COMP-002
+  priority: must-have
+  The Validator shall check that every derived_from reference
+  in a component-level requirement resolves to an existing
+  system-level requirement id.
+
+req BP-002-V04 "Validate allocated_to references"
+  derived_from: BP-002
+  allocated_to: COMP-002
+  priority: must-have
+  The Validator shall check that every allocated_to reference
+  in a component-level requirement resolves to an existing
+  component name.
+
+req BP-002-V05 "Validate depends_on references"
+  derived_from: BP-002
+  allocated_to: COMP-002
+  priority: must-have
+  The Validator shall check that every depends_on reference
+  in a component resolves to an existing component name.
+
+req BP-002-V06 "Validate interface references"
+  derived_from: BP-002
+  allocated_to: COMP-002
+  priority: must-have
+  The Validator shall check that every type reference in an
+  interface field resolves to a known type or another
+  interface definition.
+
+req BP-002-V07 "Detect duplicate identifiers"
+  derived_from: BP-002
+  allocated_to: COMP-002
+  priority: must-have
+  IF two or more elements share the same identifier,
+  THEN the Validator shall report a duplication error
+  for each occurrence.
+
+req BP-003-V01 "Error location reporting"
+  derived_from: BP-003
+  allocated_to: COMP-002
+  priority: must-have
+  The Validator shall report each validation error with
+  the source file path, line number, and a description
+  of the inconsistency.
+
+req BP-003-V02 "Non-zero exit on failure"
+  derived_from: BP-003
+  allocated_to: COMP-002
+  priority: must-have
+  IF any validation errors are found,
+  THEN the Validator shall signal failure with a non-zero
+  exit status.

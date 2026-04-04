@@ -1,0 +1,23 @@
+req BP-006-CA01 "Identify uncovered requirements"
+  derived_from: BP-006
+  allocated_to: COMP-005
+  priority: must-have
+  The CoverageAnalyser shall identify every requirement
+  that is not referenced by at least one test specification
+  via a verifies link.
+
+req BP-006-CA02 "Identify unallocated requirements"
+  derived_from: BP-006
+  allocated_to: COMP-005
+  priority: must-have
+  The CoverageAnalyser shall identify every system requirement
+  that is not referenced by at least one component via a
+  satisfies link.
+
+req BP-006-CA03 "Report coverage metrics"
+  derived_from: BP-006
+  allocated_to: COMP-005
+  priority: must-have
+  WHEN coverage analysis completes, the CoverageAnalyser
+  shall report the total number of requirements, the number
+  covered, the number uncovered, and the coverage percentage.

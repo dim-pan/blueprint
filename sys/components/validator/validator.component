@@ -1,8 +1,8 @@
-component Validator
+component COMP-002 "Validator"
   responsibility: Check that the parsed system model is internally
                   consistent — all cross-references resolve, all
                   required fields are present, and no contradictions
                   exist. Report each error with source file and
                   location.
-  depends_on: Parser
+  depends_on: COMP-001
   satisfies: BP-002, BP-003

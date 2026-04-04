@@ -1,0 +1,31 @@
+req BP-005-T01 "Forward tracing"
+  derived_from: BP-005
+  allocated_to: COMP-004
+  priority: must-have
+  WHEN the user queries a requirement id,
+  the Tracer shall return the components that satisfy it
+  and the test specifications that verify it.
+
+req BP-005-T02 "Backward tracing"
+  derived_from: BP-005
+  allocated_to: COMP-004
+  priority: must-have
+  WHEN the user queries a test specification or component,
+  the Tracer shall return the requirements it traces back to.
+
+req BP-005-T03 "Derived requirement chain"
+  derived_from: BP-005
+  allocated_to: COMP-004
+  priority: must-have
+  The Tracer shall follow derived_from links to build the
+  full chain from component-level requirements up to
+  system-level requirements.
+
+req BP-005-T04 "Full traceability matrix"
+  derived_from: BP-005
+  allocated_to: COMP-004
+  priority: must-have
+  WHEN the user requests a traceability matrix,
+  the Tracer shall produce a complete mapping of all
+  requirements to their satisfying components and
+  verifying test specifications.

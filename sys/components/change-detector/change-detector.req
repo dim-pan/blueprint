@@ -1,0 +1,38 @@
+req BP-007-CD01 "Detect added elements"
+  derived_from: BP-007
+  allocated_to: COMP-006
+  priority: must-have
+  WHEN a requirement, interface, component, or test
+  specification has been added since the last sync,
+  the ChangeDetector shall include it in the change set.
+
+req BP-007-CD02 "Detect modified elements"
+  derived_from: BP-007
+  allocated_to: COMP-006
+  priority: must-have
+  WHEN a model element has been modified since the last sync,
+  the ChangeDetector shall include it in the change set.
+
+req BP-007-CD03 "Detect removed elements"
+  derived_from: BP-007
+  allocated_to: COMP-006
+  priority: must-have
+  WHEN a model element has been removed since the last sync,
+  the ChangeDetector shall include it in the change set.
+
+req BP-007-CD04 "Identify affected components"
+  derived_from: BP-007
+  allocated_to: COMP-006
+  priority: must-have
+  WHEN a change is detected, the ChangeDetector shall
+  identify all components affected — both those directly
+  changed and those that depend on changed elements through
+  satisfies, depends_on, or interface references.
+
+req BP-007-CD05 "Store sync state"
+  derived_from: BP-007
+  allocated_to: COMP-006
+  priority: must-have
+  WHEN a sync completes successfully, the ChangeDetector
+  shall persist the current model state as the baseline
+  for the next change detection.

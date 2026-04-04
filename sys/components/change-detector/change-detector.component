@@ -1,8 +1,8 @@
-component ChangeDetector
+component COMP-006 "ChangeDetector"
   responsibility: Compare the current system model against the last
                   synced state and identify which components are
                   affected by the changes — through direct modification
                   or through changed dependencies (requirements,
                   interfaces, test specifications).
-  depends_on: Parser
+  depends_on: COMP-001
   satisfies: BP-007

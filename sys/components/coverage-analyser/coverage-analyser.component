@@ -1,5 +1,5 @@
-component CoverageAnalyser
+component COMP-005 "CoverageAnalyser"
   responsibility: Identify requirements that are not covered by at
                   least one test specification and report the gaps.
-  depends_on: Tracer
+  depends_on: COMP-004
   satisfies: BP-006

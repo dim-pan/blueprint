@@ -1,0 +1,8 @@
+component Tracer
+  responsibility: Maintain and query the traceability chain across
+                  the system model — from requirements to components
+                  to test specifications. Support both forward tracing
+                  (requirement to implementation) and backward tracing
+                  (test to requirement).
+  depends_on: Parser
+  satisfies: BP-005

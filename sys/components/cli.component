@@ -1,0 +1,5 @@
+component CLI
+  responsibility: Expose all system operations to the user via a
+                  command-line interface. Route user commands to the
+                  appropriate components and present results.
+  depends_on: Parser, Validator, Assembler, Tracer, CoverageAnalyser

@@ -1,0 +1,6 @@
+# Source reference materials (large, binary or derived)
+resources/*.pdf
+resources/*.txt
+
+# Generated code (artifact, not source of truth)
+src/

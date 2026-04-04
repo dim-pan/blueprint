@@ -1,0 +1,5 @@
+component CoverageAnalyser
+  responsibility: Identify requirements that are not covered by at
+                  least one test specification and report the gaps.
+  depends_on: Tracer
+  satisfies: BP-006

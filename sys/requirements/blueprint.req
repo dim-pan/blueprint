@@ -1,0 +1,33 @@
+req BP-001 "System model definition"
+  priority: must-have
+  The system shall accept a human-readable, text-based system model
+  as the single source of truth for a software system.
+
+req BP-002 "Model validation"
+  priority: must-have
+  WHEN the user requests validation,
+  the system shall verify that the system model is internally
+  consistent and all cross-references resolve.
+
+req BP-003 "Validation error reporting"
+  priority: must-have
+  IF the system model contains inconsistencies,
+  THEN the system shall report each error with its location
+  and exit with a non-zero status.
+
+req BP-004 "Agent context generation"
+  priority: must-have
+  WHEN the user requests context assembly,
+  the system shall produce a complete, resolved context
+  suitable for consumption by an AI coding agent.
+
+req BP-005 "Traceability"
+  priority: must-have
+  The system shall maintain traceability from requirements
+  to components to test specifications.
+
+req BP-006 "Coverage analysis"
+  priority: must-have
+  WHEN the user requests verification,
+  the system shall identify any requirements not covered
+  by at least one test specification.

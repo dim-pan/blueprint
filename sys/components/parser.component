@@ -1,0 +1,6 @@
+component Parser
+  responsibility: Read system model files and produce a structured
+                  in-memory representation of requirements, interfaces,
+                  components, and test specifications with all
+                  cross-references preserved.
+  satisfies: BP-001

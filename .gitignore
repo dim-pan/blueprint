@@ -1,3 +1,6 @@
+# Local development config
+CLAUDE.md
+
 # Source reference materials (large, binary or derived)
 resources/*.pdf
 resources/*.txt

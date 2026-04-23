@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go version *)",
+      "Read(//usr/local/go/bin/**)",
+      "Read(//opt/homebrew/Cellar/**)",
+      "Bash(/opt/homebrew/bin/go build *)",
+      "Bash(/opt/homebrew/bin/go test *)",
+      "Bash(awk '{print $2}')"
+    ]
+  }
+}

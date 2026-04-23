@@ -1,0 +1,391 @@
+## BP-001-P01: Parse requirement files
+
+test TC-P01-01 "Parse ubiquitous requirement"
+  verifies: BP-001-P01
+  given: a .req file containing
+         req REQ-001 "Do the thing"
+           priority: must-have
+           The system shall do the thing.
+  expect: one Requirement with
+          id: "REQ-001",
+          title: "Do the thing",
+          priority: "must-have",
+          pattern: "ubiquitous",
+          statement: "The system shall do the thing."
+
+test TC-P01-02 "Parse event-driven requirement"
+  verifies: BP-001-P01
+  given: a .req file containing
+         req REQ-002 "On click"
+           priority: must-have
+           WHEN the user clicks the button,
+           the system shall record the click.
+  expect: Requirement with
+          pattern: "event-driven",
+          statement: "WHEN the user clicks the button, the system shall record the click."
+
+test TC-P01-03 "Parse unwanted-behaviour requirement"
+  verifies: BP-001-P01
+  given: a .req file containing
+         req REQ-003 "Reject empty"
+           priority: must-have
+           IF the input is empty,
+           THEN the system shall reject the request.
+  expect: Requirement with pattern: "unwanted"
+
+test TC-P01-04 "Parse state-driven requirement"
+  verifies: BP-001-P01
+  given: a .req file containing
+         req REQ-004 "While safe"
+           priority: must-have
+           WHILE operating in safe mode,
+           the system shall log all state transitions.
+  expect: Requirement with pattern: "state-driven"
+
+test TC-P01-05 "Parse optional-feature requirement"
+  verifies: BP-001-P01
+  given: a .req file containing
+         req REQ-005 "Admin feature"
+           priority: should-have
+           WHERE admin mode is enabled,
+           the system shall expose the debug panel.
+  expect: Requirement with pattern: "optional"
+
+test TC-P01-06 "Multiple requirements in one file"
+  verifies: BP-001-P01
+  given: a .req file containing three req blocks separated by blank lines
+  expect: three Requirements parsed in file order, each with
+          its own id, title, priority, pattern, and statement
+
+test TC-P01-07 "Multi-line statement collapsed to single string"
+  verifies: BP-001-P01
+  given: a req block whose EARS statement spans three
+         indented lines
+  expect: Requirement.statement equal to the joined text
+          with single spaces between lines and no trailing whitespace
+
+test TC-P01-08 "Priority nice-to-have accepted"
+  verifies: BP-001-P01
+  given: a req block with priority: nice-to-have
+  expect: Requirement.priority: "nice-to-have"
+
+test TC-P01-09 "Acceptance list empty when none given"
+  verifies: BP-001-P01
+  given: a req block with only header, priority, and statement
+  expect: Requirement.accept is an empty list
+
+## BP-001-P02: Parse interface files
+
+test TC-P02-01 "Parse interface with primitive fields"
+  verifies: BP-001-P02
+  given: a .iface file containing
+         interface Todo {
+           id:    String
+           count: Integer
+           done:  Boolean
+         }
+  expect: one InterfaceDefinition named "Todo" with three Fields
+          whose types are "String", "Integer", "Boolean" and
+          whose optional flags are all false
+
+test TC-P02-02 "Parse optional field"
+  verifies: BP-001-P02
+  given: an interface containing a field "note: String?"
+  expect: the Field has type "String" and optional true
+
+test TC-P02-03 "Parse array field"
+  verifies: BP-001-P02
+  given: an interface containing a field "tags: String[]"
+  expect: the Field has type "String[]" and optional false
+
+test TC-P02-04 "Parse union type"
+  verifies: BP-001-P02
+  given: an interface containing a field
+         "status: pending | active | done"
+  expect: the Field has type "pending | active | done"
+
+test TC-P02-05 "Parse reference to another interface type"
+  verifies: BP-001-P02
+  given: an interface containing a field "owner: Component"
+  expect: the Field has type "Component"
+
+test TC-P02-06 "Multiple interfaces in one file"
+  verifies: BP-001-P02
+  given: a .iface file with two interface blocks separated
+         by a blank line
+  expect: two InterfaceDefinitions parsed in file order
+
+test TC-P02-07 "Whitespace alignment in fields accepted"
+  verifies: BP-001-P02
+  given: an interface whose field names are aligned with
+         extra spaces before the colon
+  expect: the Field.name is the identifier only, with no
+          surrounding whitespace
+
+## BP-001-P03: Parse component files
+
+test TC-P03-01 "Parse component with single-line responsibility"
+  verifies: BP-001-P03
+  given: a .component file containing
+         component COMP-001 "Parser"
+           responsibility: Read model files.
+           satisfies: BP-001
+  expect: one Component with id "COMP-001", name "Parser",
+          responsibility "Read model files.", satisfies ["BP-001"],
+          depends_on is an empty list
+
+test TC-P03-02 "Responsibility wraps across indented lines"
+  verifies: BP-001-P03
+  given: a component block whose responsibility spans three
+         indented continuation lines
+  expect: Component.responsibility is the joined text with
+          single spaces between lines
+
+test TC-P03-03 "Parse depends_on list"
+  verifies: BP-001-P03
+  given: a component block with
+         depends_on: COMP-001, COMP-002, COMP-003
+  expect: Component.depends_on: ["COMP-001", "COMP-002", "COMP-003"]
+
+test TC-P03-04 "Parse satisfies list"
+  verifies: BP-001-P03
+  given: a component block with satisfies: BP-002, BP-003
+  expect: Component.satisfies: ["BP-002", "BP-003"]
+
+test TC-P03-05 "Component with no satisfies is accepted"
+  verifies: BP-001-P03
+  given: a component block with responsibility and depends_on
+         but no satisfies line
+  expect: Component.satisfies is an empty list
+
+test TC-P03-06 "Multiple components back-to-back"
+  verifies: BP-001-P03
+  given: a .component file with two component blocks, no blank
+         line between them
+  expect: two Components parsed in file order
+
+## BP-001-P04: Parse test specification files
+
+test TC-P04-01 "Parse basic test spec"
+  verifies: BP-001-P04
+  given: a .testspec file containing
+         test TC-001 "Do the thing"
+           verifies: REQ-001
+           given: a condition
+           expect: a result
+  expect: one TestSpec with id "TC-001", title "Do the thing",
+          verifies ["REQ-001"], given "a condition",
+          expect "a result", and when is empty
+
+test TC-P04-02 "Parse test spec with when clause"
+  verifies: BP-001-P04
+  given: a test block that has given, when, and expect clauses
+  expect: TestSpec.when is the when text joined to one line
+
+test TC-P04-03 "Multiple verifies references"
+  verifies: BP-001-P04
+  given: a test block with "verifies: BP-002, BP-003"
+  expect: TestSpec.verifies: ["BP-002", "BP-003"]
+
+test TC-P04-04 "Multi-line given clause"
+  verifies: BP-001-P04
+  given: a test block whose given clause spans two indented
+         continuation lines
+  expect: TestSpec.given is the joined text with single
+          spaces between lines
+
+test TC-P04-05 "Multi-line expect clause"
+  verifies: BP-001-P04
+  given: a test block whose expect clause spans two indented
+         continuation lines
+  expect: TestSpec.expect is the joined text
+
+test TC-P04-06 "Section headers starting with ## are skipped"
+  verifies: BP-001-P04
+  given: a .testspec file with "## BP-001: Some section" lines
+         between test blocks
+  expect: the section lines are ignored and the tests parse
+          successfully
+
+test TC-P04-07 "Multiple tests in one file"
+  verifies: BP-001-P04
+  given: a .testspec file containing three test blocks
+  expect: three TestSpecs parsed in file order
+
+## BP-001-P05: Parse derived requirement files
+
+test TC-P05-01 "Parse derived_from and allocated_to"
+  verifies: BP-001-P05
+  given: a .req file containing
+         req BP-001-P01 "Parse reqs"
+           derived_from: BP-001
+           allocated_to: COMP-001
+           priority: must-have
+           The parser shall extract requirements.
+  expect: Requirement with derived_from "BP-001",
+          allocated_to "COMP-001", and the expected
+          id, priority, and statement
+
+test TC-P05-02 "Derived fields empty on system-level requirement"
+  verifies: BP-001-P05
+  given: a .req file with no derived_from or allocated_to lines
+  expect: Requirement.derived_from: "" and
+          Requirement.allocated_to: ""
+
+test TC-P05-03 "Derived fields accept ordering either before or after priority"
+  verifies: BP-001-P05
+  given: a req block where allocated_to appears before derived_from
+         and both before priority
+  expect: the parser extracts both fields correctly regardless
+          of order
+
+## BP-001-P08: Directory traversal
+
+test TC-P08-01 "Parse full sys directory"
+  verifies: BP-001-P08
+  given: a sys/ directory containing requirements/, interfaces/,
+         components/<name>/, and tests/ subdirectories with
+         valid model files
+  expect: a SystemModel where requirements, interfaces,
+          components, and test_specs lists are all populated
+          from the corresponding files
+
+test TC-P08-02 "Include derived requirements from component folders"
+  verifies: BP-001-P08
+  given: a sys/ directory where components/parser/parser.req
+         contains derived requirements
+  expect: SystemModel.requirements contains both the
+          system-level requirements and the derived requirements
+
+test TC-P08-03 "Missing subdirectory is tolerated"
+  verifies: BP-001-P08
+  given: a sys/ directory that has no tests/ subdirectory
+  expect: ParseSystemModel returns a SystemModel whose
+          test_specs list is empty, with no error
+
+test TC-P08-04 "Empty sys directory returns empty model"
+  verifies: BP-001-P08
+  given: a sys/ directory containing no model files
+  expect: SystemModel with all four lists empty, no error
+
+test TC-P08-05 "Nonexistent path returns error"
+  verifies: BP-001-P08
+  given: a path that does not exist on disk
+  expect: a non-nil error from ParseSystemModel
+
+test TC-P08-06 "Parse error in one file stops traversal and is reported"
+  verifies: BP-001-P08
+  given: a sys/ directory where one .req file has a syntax error
+  expect: a ParseError whose file path points at the offending
+          file
+
+## BP-001-P06: Preserve source locations
+
+test TC-P06-01 "Source file path recorded"
+  verifies: BP-001-P06
+  given: a .req file at path "sys/requirements/foo.req" containing one req
+  expect: Requirement.source_file ends with "sys/requirements/foo.req"
+
+test TC-P06-02 "Line number points at req header"
+  verifies: BP-001-P06
+  given: a .req file where the req block header appears on line 5
+  expect: Requirement.line_number: 5
+
+test TC-P06-03 "Each requirement keeps its own line number"
+  verifies: BP-001-P06
+  given: a .req file with req headers on lines 1, 7, and 15
+  expect: three Requirements with line_number 1, 7, and 15 respectively
+
+test TC-P06-04 "Interface source location recorded"
+  verifies: BP-001-P06
+  given: a .iface file where an interface header appears on line 3
+  expect: InterfaceDefinition.source_file ends with the file path
+          and InterfaceDefinition.line_number: 3
+
+test TC-P06-05 "Component source location recorded"
+  verifies: BP-001-P06
+  given: a .component file where the component header is on line 2
+  expect: Component.line_number: 2 and source_file ends with
+          the file path
+
+test TC-P06-06 "Test spec source location recorded"
+  verifies: BP-001-P06
+  given: a .testspec file where a test header appears on line 4
+  expect: TestSpec.line_number: 4 and source_file ends with
+          the file path
+
+## BP-001-P07: Syntax error reporting
+
+test TC-P07-01 "Missing req id"
+  verifies: BP-001-P07
+  given: a .req file containing
+         req "No id here"
+           priority: must-have
+           The system shall do something.
+  expect: ParseError with file path, line number, and message
+          indicating an id was expected after "req"
+
+test TC-P07-02 "Missing title"
+  verifies: BP-001-P07
+  given: a req header with an id but no quoted title
+  expect: ParseError whose message mentions "title"
+
+test TC-P07-03 "Unknown priority value"
+  verifies: BP-001-P07
+  given: a req block with priority: urgent
+  expect: ParseError whose message lists the allowed values
+          (must-have, should-have, nice-to-have)
+
+test TC-P07-04 "Missing priority line"
+  verifies: BP-001-P07
+  given: a req block with no priority line before the statement
+  expect: ParseError whose message mentions "priority"
+
+test TC-P07-05 "Empty statement"
+  verifies: BP-001-P07
+  given: a req block with a header and priority but no statement lines
+  expect: ParseError whose message mentions "statement"
+
+test TC-P07-06 "Unterminated title quote"
+  verifies: BP-001-P07
+  given: a req header where the title opens with " but has no closing "
+  expect: ParseError pointing at the header line
+
+test TC-P07-07 "Missing opening brace on interface"
+  verifies: BP-001-P07
+  given: a .iface file with "interface Foo" and no opening brace
+  expect: ParseError pointing at the header line, message mentions "{"
+
+test TC-P07-08 "Missing closing brace on interface"
+  verifies: BP-001-P07
+  given: a .iface file where an interface block opens with { but
+         the file ends before any matching }
+  expect: ParseError whose message mentions "}"
+
+test TC-P07-09 "Malformed field line"
+  verifies: BP-001-P07
+  given: a field line inside an interface with no colon separator
+  expect: ParseError pointing at the offending line, message
+          mentions "field"
+
+test TC-P07-10 "Component missing responsibility"
+  verifies: BP-001-P07
+  given: a component block with a header and satisfies list
+         but no responsibility line
+  expect: ParseError whose message mentions "responsibility"
+
+test TC-P07-11 "Component unknown body key"
+  verifies: BP-001-P07
+  given: a component block containing a line "foo: bar"
+  expect: ParseError pointing at the offending line, message
+          mentions the unknown key
+
+test TC-P07-12 "Test spec missing given"
+  verifies: BP-001-P07
+  given: a test block with verifies and expect but no given clause
+  expect: ParseError whose message mentions "given"
+
+test TC-P07-13 "Test spec missing expect"
+  verifies: BP-001-P07
+  given: a test block with verifies and given but no expect clause
+  expect: ParseError whose message mentions "expect"

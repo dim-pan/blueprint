@@ -1,12 +1,14 @@
 interface Requirement {
-  id:          String
-  title:       String
-  priority:    must-have | should-have | nice-to-have
-  pattern:     ubiquitous | event-driven | unwanted | state-driven | optional
-  statement:   String
-  accept:      AcceptanceCriterion[]
-  source_file: String
-  line_number: Integer
+  id:           String
+  title:        String
+  priority:     must-have | should-have | nice-to-have
+  pattern:      ubiquitous | event-driven | unwanted | state-driven | optional
+  statement:    String
+  accept:       AcceptanceCriterion[]
+  derived_from: String?
+  allocated_to: String?
+  source_file:  String
+  line_number:  Integer
 }
 
 interface AcceptanceCriterion {

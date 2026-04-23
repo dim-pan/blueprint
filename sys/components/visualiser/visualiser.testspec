@@ -1,0 +1,42 @@
+## BP-009-VIS-01: Serve model as JSON
+
+test TC-VIS-01-01 "GET /api/model returns the parsed model"
+  verifies: BP-009-VIS-01
+  given: a SystemModel with components, requirements,
+         interfaces, and test specs
+  when: GET /api/model is requested from the running server
+  expect: status 200 and a JSON body whose top-level keys
+          include "components", "requirements", "interfaces",
+          and "test_specs", each a list populated from the
+          model
+
+test TC-VIS-01-02 "Counts match the parsed model"
+  verifies: BP-009-VIS-01
+  given: a SystemModel with 2 components and 3 requirements
+  when: GET /api/model is requested
+  expect: the decoded JSON has 2 entries in "components"
+          and 3 entries in "requirements"
+
+## BP-009-VIS-02: Render graph in browser canvas
+
+test TC-VIS-02-01 "Root path serves the canvas page"
+  verifies: BP-009-VIS-02
+  given: the server is running
+  when: GET / is requested
+  expect: status 200 and the response body is an HTML
+          document that loads the canvas application
+
+## BP-009-VIS-05: Single-port local server
+
+test TC-VIS-05-01 "Server binds and serves on the configured port"
+  verifies: BP-009-VIS-05
+  given: the server is instructed to listen on a free port
+  when: the server is started
+  expect: the server accepts GET /api/model on that port
+          and returns the JSON model
+
+test TC-VIS-05-02 "Default port is 8080"
+  verifies: BP-009-VIS-05
+  given: Serve is invoked with no port override
+  when: the server is initialised
+  expect: the listen address resolves to :8080

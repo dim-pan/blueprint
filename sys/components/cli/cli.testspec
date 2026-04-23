@@ -40,6 +40,18 @@ test TC-CLI-02-02 "Assemble refuses when model is invalid"
   expect: no files are written, exit code is non-zero,
           stderr mentions the validation error
 
+## BP-CLI-07: Serve command
+
+test TC-CLI-07-01 "Serve validates port argument"
+  verifies: BP-CLI-07
+  given: an invocation "blueprint serve --port not-a-number"
+  expect: exit code is non-zero and stderr mentions "port"
+
+test TC-CLI-07-02 "Serve rejects missing port value"
+  verifies: BP-CLI-07
+  given: an invocation "blueprint serve --port" with no value
+  expect: exit code is non-zero
+
 ## BP-CLI-03: Sync command
 
 test TC-CLI-03-01 "Sync with no baseline writes everything and saves baseline"

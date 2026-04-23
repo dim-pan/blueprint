@@ -44,3 +44,12 @@ req BP-CLI-06 "Model directory option"
   priority: must-have
   The CLI shall accept a path to the system model directory,
   defaulting to sys/ in the current working directory.
+
+req BP-CLI-07 "Serve command"
+  derived_from: BP-009
+  allocated_to: COMP-007
+  priority: should-have
+  WHEN the user runs the serve command,
+  the CLI shall invoke the Visualiser and launch a local
+  HTTP server that renders the system model as an
+  interactive canvas in a browser.

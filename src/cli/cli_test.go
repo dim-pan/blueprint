@@ -361,6 +361,27 @@ func TestTC_CLI_03_03_SyncAffectedOnly(t *testing.T) {
 	}
 }
 
+// TC-CLI-07-01
+func TestTC_CLI_07_01_ServePortInvalid(t *testing.T) {
+	var out, errBuf bytes.Buffer
+	code := Run([]string{"serve", "--port", "not-a-number"}, &out, &errBuf)
+	if code == 0 {
+		t.Fatalf("expected non-zero exit")
+	}
+	if !strings.Contains(strings.ToLower(errBuf.String()), "port") {
+		t.Fatalf("stderr missing 'port': %s", errBuf.String())
+	}
+}
+
+// TC-CLI-07-02
+func TestTC_CLI_07_02_ServePortMissingValue(t *testing.T) {
+	var out, errBuf bytes.Buffer
+	code := Run([]string{"serve", "--port"}, &out, &errBuf)
+	if code == 0 {
+		t.Fatalf("expected non-zero exit")
+	}
+}
+
 // TC-CLI-02-02
 func TestTC_CLI_02_02_AssembleRefusesInvalid(t *testing.T) {
 	sysDir := t.TempDir()

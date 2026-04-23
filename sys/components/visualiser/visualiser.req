@@ -1,0 +1,44 @@
+req BP-009-VIS-01 "Serve model as JSON"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: must-have
+  WHEN the visualiser is serving a system model,
+  the HTTP endpoint GET /api/model shall return a JSON
+  document containing all components, requirements,
+  interfaces, and test specifications parsed from the
+  model directory.
+
+req BP-009-VIS-02 "Render graph in browser canvas"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: must-have
+  WHEN the user opens the served page in a browser,
+  the Visualiser shall display components and system
+  requirements as draggable nodes on a pan-and-zoom
+  canvas with satisfy and depends_on edges between them.
+
+req BP-009-VIS-03 "Layer toggles reveal derived reqs and test specs"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: must-have
+  WHILE the canvas is displayed,
+  the user shall be able to toggle visibility of derived
+  requirements and test specifications without reloading
+  the page.
+
+req BP-009-VIS-04 "Select node reveals source details"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: must-have
+  WHEN the user clicks a node in the canvas,
+  the Visualiser shall display the selected element's id,
+  title, source file path, and source line number in a
+  side panel.
+
+req BP-009-VIS-05 "Single-port local server"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: must-have
+  WHEN the serve command is invoked,
+  the Visualiser shall listen on a local TCP port
+  (default 8080) and print the served URL to stdout.

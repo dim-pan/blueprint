@@ -1,0 +1,10 @@
+component COMP-008 "Visualiser"
+  responsibility: Present the system model as an interactive
+                  node-and-edge graph in a local browser canvas.
+                  Serve a locally-hosted page that renders
+                  components, requirements, interfaces, and test
+                  specifications together with their satisfy,
+                  verify, derive, and depends_on relationships.
+                  Read-only: no edits flow back from the UI.
+  depends_on: COMP-001, COMP-004
+  satisfies: BP-009

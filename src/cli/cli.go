@@ -14,6 +14,7 @@ import (
 	"github.com/dim-pan/blueprint/src/parser"
 	"github.com/dim-pan/blueprint/src/tracer"
 	"github.com/dim-pan/blueprint/src/validator"
+	"github.com/dim-pan/blueprint/src/visualiser"
 )
 
 const defaultSysDir = "sys"
@@ -36,6 +37,10 @@ Commands:
                         write AgentContexts only for affected
                         components. Baseline is stored under
                         .blueprint/baseline.json.
+  serve [sys-dir] [--port N]
+                        Start a local web server (default :8080)
+                        that renders the system model as an
+                        interactive canvas. Ctrl+C to stop.
 
 If model-dir is omitted, the default is "sys" relative to the
 current working directory.
@@ -58,6 +63,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return runAssemble(args[1:], stdout, stderr)
 	case "sync":
 		return runSync(args[1:], stdout, stderr)
+	case "serve":
+		return runServe(args[1:], stdout, stderr)
 	case "-h", "--help", "help":
 		fmt.Fprint(stdout, usage)
 		return 0
@@ -232,6 +239,51 @@ func runAssemble(args []string, stdout, stderr io.Writer) int {
 			path, len(ctx.Requirements), len(ctx.TestSpecs), len(ctx.Interfaces))
 	}
 	fmt.Fprintf(stdout, "assembled %d component context(s)\n", len(contexts))
+	return 0
+}
+
+func runServe(args []string, stdout, stderr io.Writer) int {
+	sysDir := defaultSysDir
+	port := visualiser.DefaultPort
+	i := 0
+	for i < len(args) {
+		a := args[i]
+		switch a {
+		case "--port", "-p":
+			if i+1 >= len(args) {
+				fmt.Fprintln(stderr, "--port requires a value")
+				return 2
+			}
+			var p int
+			if _, err := fmt.Sscanf(args[i+1], "%d", &p); err != nil || p <= 0 || p > 65535 {
+				fmt.Fprintf(stderr, "invalid port: %q\n", args[i+1])
+				return 2
+			}
+			port = p
+			i += 2
+		default:
+			sysDir = a
+			i++
+		}
+	}
+
+	model, err := loadModel(sysDir, stderr)
+	if err != nil {
+		return 1
+	}
+	if result := validator.Validate(model); !result.Valid {
+		fmt.Fprintf(stderr, "warning: model has %d validation error(s); serving anyway\n", len(result.Errors))
+	}
+
+	addr := fmt.Sprintf(":%d", port)
+	url := fmt.Sprintf("http://localhost:%d", port)
+	fmt.Fprintf(stdout, "blueprint · %s\n  %d requirements · %d components · %d interfaces · %d test specs\n  serving %s\n  press Ctrl+C to stop\n",
+		sysDir, len(model.Requirements), len(model.Components), len(model.Interfaces), len(model.TestSpecs), url)
+
+	if err := visualiser.Serve(model, addr); err != nil {
+		fmt.Fprintf(stderr, "server error: %s\n", err)
+		return 1
+	}
 	return 0
 }
 

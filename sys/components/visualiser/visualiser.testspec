@@ -17,7 +17,7 @@ test TC-VIS-01-02 "Counts match the parsed model"
   expect: the decoded JSON has 2 entries in "components"
           and 3 entries in "requirements"
 
-## BP-009-VIS-02: Top-level overview canvas
+## BP-009-VIS-02: Component dependency graph in topological order
 
 test TC-VIS-02-01 "Root path serves the canvas page"
   verifies: BP-009-VIS-02
@@ -25,6 +25,14 @@ test TC-VIS-02-01 "Root path serves the canvas page"
   when: GET / is requested
   expect: status 200 and the response body is an HTML
           document that loads the canvas application
+
+test TC-VIS-02-02 "Components are arranged in dependency order"
+  verifies: BP-009-VIS-02
+  given: the top canvas is rendered for a model containing
+         component A which depends on component B
+  expect: component A is positioned further along the
+          dependency direction than component B, and the
+          edge connecting them is labelled "depends on"
 
 ## BP-009-VIS-03: Component detail pane on click
 
@@ -94,6 +102,46 @@ test TC-VIS-07-01 "Source path and line appear for selected element"
          requirement, or test spec)
   expect: the element's source_file path and line_number
           are visible in the pane
+
+## BP-009-VIS-09: System requirements list pane
+
+test TC-VIS-09-01 "All system requirements appear in the list"
+  verifies: BP-009-VIS-09
+  given: the page is loaded for a model with N system
+         requirements
+  expect: the left-hand list pane contains N entries,
+          one per system requirement, each showing the
+          requirement's id and title
+
+test TC-VIS-09-02 "Unallocated requirements are visually distinct"
+  verifies: BP-009-VIS-09
+  given: a model containing at least one system requirement
+         not satisfied by any component
+  expect: the corresponding list entry is rendered with
+          the unallocated colour, visually distinct from
+          satisfied entries
+
+## BP-009-VIS-10: Hovering a req pill highlights satisfying components
+
+test TC-VIS-10-01 "Hover emphasises satisfying components"
+  verifies: BP-009-VIS-10
+  given: a system requirement entry in the list pane
+         for a req satisfied by one component and not
+         by another
+  when: the user hovers over that entry
+  expect: the satisfying component node is visually
+          emphasised and the non-satisfying component
+          is visually de-emphasised
+
+## BP-009-VIS-11: Clicking a req pill opens its details
+
+test TC-VIS-11-01 "Click opens the detail pane"
+  verifies: BP-009-VIS-11
+  given: the system requirements list pane is visible
+  when: the user clicks a system requirement entry
+  expect: the detail pane opens and its content shows
+          the clicked requirement's statement, priority,
+          and source file location
 
 ## BP-009-VIS-08: Single-port local server
 

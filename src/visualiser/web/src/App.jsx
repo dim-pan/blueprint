@@ -33,6 +33,21 @@ const EDGE_STYLE = {
   verifies:     { stroke: '#663399', strokeWidth: 1.2 },
 };
 
+const EDGE_LABEL = {
+  satisfies:    'satisfies',
+  depends_on:   'depends on',
+  derived_from: 'derived from',
+  allocated_to: 'allocated to',
+  verifies:     'verifies',
+};
+
+const labelDeco = {
+  labelStyle: { fontSize: 10, fill: '#444' },
+  labelBgStyle: { fill: '#fff', fillOpacity: 0.85 },
+  labelBgPadding: [3, 2],
+  labelBgBorderRadius: 3,
+};
+
 function truncate(s, n) {
   if (!s) return '';
   return s.length > n ? s.slice(0, n - 1) + '…' : s;
@@ -52,13 +67,13 @@ function nodeStyle(kind, width = NODE_W) {
   };
 }
 
-function laidOut(nodes, edges, opts = {}) {
-  const { w = NODE_W, h = NODE_H, rankdir = 'TB', nodesep = 60, ranksep = 110 } = opts;
+function laidOut(nodes, dagreEdges, opts = {}) {
+  const { w = NODE_W, h = NODE_H, rankdir = 'LR', nodesep = 50, ranksep = 100 } = opts;
   const g = new dagre.graphlib.Graph();
   g.setGraph({ rankdir, nodesep, ranksep, marginx: 20, marginy: 20 });
   g.setDefaultEdgeLabel(() => ({}));
   nodes.forEach((n) => g.setNode(n.id, { width: w, height: h }));
-  edges.forEach((e) => g.setEdge(e.source, e.target));
+  dagreEdges.forEach((e) => g.setEdge(e.source, e.target));
   dagre.layout(g);
   return nodes.map((n) => {
     const { x, y } = g.node(n.id);
@@ -66,54 +81,40 @@ function laidOut(nodes, edges, opts = {}) {
   });
 }
 
-// BP-009-VIS-02: Top-level overview — components + system reqs only.
+// BP-009-VIS-02: Components only, laid out in topological order LR
+// (leaves on the left, orchestrators on the right).
 function buildOverview(model) {
   if (!model) return { nodes: [], edges: [] };
 
-  const satisfyingComponents = new Map();
-  for (const c of model.components) {
-    for (const s of c.Satisfies || []) {
-      if (!satisfyingComponents.has(s)) satisfyingComponents.set(s, []);
-      satisfyingComponents.get(s).push(c.ID);
-    }
-  }
+  const nodes = model.components.map((c) => ({
+    id: c.ID,
+    type: 'default',
+    data: { label: `${c.ID}\n${truncate(c.Name, 28)}`, kind: 'component', payload: c },
+    style: nodeStyle('component'),
+    position: { x: 0, y: 0 },
+  }));
 
-  const nodes = [];
   const edges = [];
-
-  for (const c of model.components) {
-    nodes.push({
-      id: c.ID,
-      type: 'default',
-      data: { label: `${c.ID}\n${truncate(c.Name, 28)}`, kind: 'component', payload: c },
-      style: nodeStyle('component'),
-      position: { x: 0, y: 0 },
-    });
-  }
-
-  for (const r of model.requirements) {
-    if (r.DerivedFrom) continue; // system reqs only
-    const isUnallocated = !(satisfyingComponents.get(r.ID) || []).length;
-    nodes.push({
-      id: r.ID,
-      type: 'default',
-      data: { label: `${r.ID}\n${truncate(r.Title, 30)}`, kind: 'sysreq', payload: r },
-      style: nodeStyle(isUnallocated ? 'gap' : 'sysreq'),
-      position: { x: 0, y: 0 },
-    });
-  }
-
   const ids = new Set(nodes.map((n) => n.id));
   for (const c of model.components) {
-    for (const s of c.Satisfies || []) {
-      if (ids.has(s)) edges.push({ id: `${c.ID}->sat->${s}`, source: c.ID, target: s, style: EDGE_STYLE.satisfies });
-    }
     for (const d of c.DependsOn || []) {
-      if (ids.has(d)) edges.push({ id: `${c.ID}->dep->${d}`, source: c.ID, target: d, style: EDGE_STYLE.depends_on });
+      if (!ids.has(d)) continue;
+      edges.push({
+        id: `${c.ID}->dep->${d}`,
+        source: c.ID,
+        target: d,
+        label: EDGE_LABEL.depends_on,
+        ...labelDeco,
+        style: EDGE_STYLE.depends_on,
+      });
     }
   }
 
-  return { nodes: laidOut(nodes, edges), edges };
+  // Reverse edges for dagre ranking so dependency targets (leaves) rank left
+  // while dependents (users) rank right — visually "foundation → application".
+  const dagreEdges = edges.map((e) => ({ source: e.target, target: e.source }));
+
+  return { nodes: laidOut(nodes, dagreEdges, { rankdir: 'LR' }), edges };
 }
 
 // BP-009-VIS-06: Sub-canvas — component + derived reqs + verifying tests + satisfied sysreqs.
@@ -159,15 +160,24 @@ function buildComponentSubgraph(model, componentId) {
 
   const edges = [];
   for (const s of c.Satisfies || []) {
-    edges.push({ id: `${c.ID}->sat->${s}`, source: c.ID, target: s, style: EDGE_STYLE.satisfies });
+    edges.push({
+      id: `${c.ID}->sat->${s}`, source: c.ID, target: s,
+      label: EDGE_LABEL.satisfies, ...labelDeco, style: EDGE_STYLE.satisfies,
+    });
   }
   for (const r of derived) {
-    edges.push({ id: `${r.ID}->alloc->${c.ID}`, source: r.ID, target: c.ID, style: EDGE_STYLE.allocated_to });
+    edges.push({
+      id: `${r.ID}->alloc->${c.ID}`, source: r.ID, target: c.ID,
+      label: EDGE_LABEL.allocated_to, ...labelDeco, style: EDGE_STYLE.allocated_to,
+    });
   }
   for (const t of tests) {
     for (const v of t.Verifies || []) {
       if (derivedIds.has(v)) {
-        edges.push({ id: `${t.ID}->ver->${v}`, source: t.ID, target: v, style: EDGE_STYLE.verifies });
+        edges.push({
+          id: `${t.ID}->ver->${v}`, source: t.ID, target: v,
+          label: EDGE_LABEL.verifies, ...labelDeco, style: EDGE_STYLE.verifies,
+        });
       }
     }
   }
@@ -223,7 +233,6 @@ function Block({ label, children }) {
   );
 }
 
-// BP-009-VIS-05: List view — system reqs satisfied, then derived reqs with tests nested.
 function ComponentList({ model, componentId, onSelectElement }) {
   const c = model.components.find((x) => x.ID === componentId);
   const sysReqs = model.requirements.filter((r) => (c.Satisfies || []).includes(r.ID));
@@ -304,7 +313,6 @@ function SubCanvas({ model, componentId, onNodeClick }) {
   const { nodes, edges } = useMemo(() => buildComponentSubgraph(model, componentId), [model, componentId]);
   const [n, , onNodesChange] = useNodesState(nodes);
   const [e, , onEdgesChange] = useEdgesState(edges);
-  // remount-on-component-change via key in parent handles node/edge refresh.
   return (
     <div style={{ height: '100%', width: '100%' }}>
       <ReactFlow
@@ -325,14 +333,14 @@ function SubCanvas({ model, componentId, onNodeClick }) {
 }
 
 function DetailPane({ model, selected, onClose, onSelectElement }) {
-  const [view, setView] = useState('list'); // BP-009-VIS-04: list is default
+  const [view, setView] = useState('list');
   useEffect(() => { setView('list'); }, [selected?.id]);
 
   if (!selected) {
     return (
       <div style={{ padding: 16, fontSize: 12, color: '#666' }}>
-        <h3 style={{ margin: 0, fontSize: 14, color: '#222' }}>Click a component</h3>
-        <p>Click any component node to open its detail pane. Click a system req for quick details.</p>
+        <h3 style={{ margin: 0, fontSize: 14, color: '#222' }}>Click a component or req</h3>
+        <p>Click a component node to open its detail pane. Click a req pill for req details.</p>
       </div>
     );
   }
@@ -396,6 +404,68 @@ function CloseButton({ onClose }) {
   );
 }
 
+// BP-009-VIS-09/10/11: Left-hand list pane, hover-highlight, click-to-open.
+function SysReqListPane({ model, satisfiersBySysreq, hovered, setHovered, onClickEntry, selectedId }) {
+  const sysReqs = model.requirements.filter((r) => !r.DerivedFrom);
+  return (
+    <div style={{
+      width: 260,
+      borderRight: '1px solid #ddd',
+      background: '#fafafa',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        padding: '10px 14px',
+        borderBottom: '1px solid #e5e5e5',
+        fontSize: 11,
+        fontWeight: 600,
+        color: '#555',
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
+      }}>
+        System requirements ({sysReqs.length})
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: 8 }}>
+        {sysReqs.map((r) => {
+          const satisfied = (satisfiersBySysreq.get(r.ID) || new Set()).size > 0;
+          const isHover = hovered === r.ID;
+          const isSelected = selectedId === r.ID;
+          const palette = satisfied ? TYPE_STYLE.sysreq : TYPE_STYLE.gap;
+          return (
+            <div
+              key={r.ID}
+              onMouseEnter={() => setHovered(r.ID)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={() => onClickEntry(r)}
+              title={r.Statement || r.Title}
+              style={{
+                padding: '6px 10px',
+                marginBottom: 4,
+                borderRadius: 4,
+                cursor: 'pointer',
+                background: palette.background,
+                border: `1px solid ${palette.border}`,
+                boxShadow: isHover || isSelected ? '0 0 0 2px #3344aa' : 'none',
+                userSelect: 'none',
+              }}
+            >
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#222' }}>{r.ID}</div>
+              <div style={{ fontSize: 11, color: '#444', marginTop: 2 }}>{r.Title}</div>
+              {!satisfied && (
+                <div style={{ fontSize: 10, color: '#aa2222', marginTop: 2, fontStyle: 'italic' }}>
+                  unallocated
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function Legend() {
   const Row = ({ color, border, label }) => (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
@@ -406,10 +476,10 @@ function Legend() {
   return (
     <div style={{ background: '#fff', padding: '8px 10px', border: '1px solid #ddd', borderRadius: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Row color={TYPE_STYLE.component.background}  border={TYPE_STYLE.component.border}  label="Component" />
-      <Row color={TYPE_STYLE.sysreq.background}     border={TYPE_STYLE.sysreq.border}     label="System req" />
+      <Row color={TYPE_STYLE.sysreq.background}     border={TYPE_STYLE.sysreq.border}     label="Sys req (satisfied)" />
+      <Row color={TYPE_STYLE.gap.background}        border={TYPE_STYLE.gap.border}        label="Sys req (unallocated)" />
       <Row color={TYPE_STYLE.derivedReq.background} border={TYPE_STYLE.derivedReq.border} label="Derived req" />
       <Row color={TYPE_STYLE.testspec.background}   border={TYPE_STYLE.testspec.border}   label="Test spec" />
-      <Row color={TYPE_STYLE.gap.background}        border={TYPE_STYLE.gap.border}        label="Unallocated" />
     </div>
   );
 }
@@ -418,6 +488,7 @@ export default function App() {
   const [model, setModel] = useState(null);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [hoveredSysReq, setHoveredSysReq] = useState(null);
 
   useEffect(() => {
     fetch('/api/model')
@@ -426,17 +497,56 @@ export default function App() {
       .catch((e) => setError(String(e)));
   }, []);
 
-  const overview = useMemo(() => buildOverview(model), [model]);
-  const [nodes, setNodes, onNodesChange] = useNodesState(overview.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(overview.edges);
+  const satisfiersBySysreq = useMemo(() => {
+    const m = new Map();
+    if (!model) return m;
+    for (const c of model.components) {
+      for (const s of c.Satisfies || []) {
+        if (!m.has(s)) m.set(s, new Set());
+        m.get(s).add(c.ID);
+      }
+    }
+    return m;
+  }, [model]);
 
-  useEffect(() => {
-    setNodes(overview.nodes);
-    setEdges(overview.edges);
-  }, [overview, setNodes, setEdges]);
+  const overview = useMemo(() => buildOverview(model), [model]);
+
+  const decoratedNodes = useMemo(() => {
+    if (!hoveredSysReq) return overview.nodes;
+    const satisfiers = satisfiersBySysreq.get(hoveredSysReq) || new Set();
+    return overview.nodes.map((n) => {
+      const isSat = satisfiers.has(n.id);
+      return {
+        ...n,
+        style: {
+          ...n.style,
+          opacity: isSat ? 1 : 0.25,
+          boxShadow: isSat ? '0 0 0 3px #3344aa' : 'none',
+        },
+      };
+    });
+  }, [overview, hoveredSysReq, satisfiersBySysreq]);
+
+  const decoratedEdges = useMemo(() => {
+    if (!hoveredSysReq) return overview.edges;
+    const satisfiers = satisfiersBySysreq.get(hoveredSysReq) || new Set();
+    return overview.edges.map((e) => {
+      const touches = satisfiers.has(e.source) || satisfiers.has(e.target);
+      return { ...e, style: { ...e.style, opacity: touches ? 1 : 0.15 } };
+    });
+  }, [overview, hoveredSysReq, satisfiersBySysreq]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(decoratedNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(decoratedEdges);
+
+  useEffect(() => { setNodes(decoratedNodes); }, [decoratedNodes, setNodes]);
+  useEffect(() => { setEdges(decoratedEdges); }, [decoratedEdges, setEdges]);
 
   const onNodeClick = useCallback((_, node) => setSelected(node), []);
   const clearSelection = useCallback(() => setSelected(null), []);
+  const onClickSysReq = useCallback((r) => {
+    setSelected({ id: r.ID, data: { kind: 'sysreq', payload: r } });
+  }, []);
 
   if (error) return <div style={{ padding: 20, color: '#a22' }}>Failed to load model: {error}</div>;
   if (!model) return <div style={{ padding: 20 }}>Loading model…</div>;
@@ -445,6 +555,14 @@ export default function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex' }}>
+      <SysReqListPane
+        model={model}
+        satisfiersBySysreq={satisfiersBySysreq}
+        hovered={hoveredSysReq}
+        setHovered={setHoveredSysReq}
+        onClickEntry={onClickSysReq}
+        selectedId={selected?.data?.kind === 'sysreq' ? selected.id : null}
+      />
       <div style={{ flex: 1, position: 'relative', minWidth: 0 }}>
         <ReactFlow
           nodes={nodes}
@@ -459,7 +577,7 @@ export default function App() {
           <Background />
           <Controls />
           <MiniMap pannable zoomable />
-          <Panel position="bottom-left">
+          <Panel position="top-right">
             <Legend />
           </Panel>
         </ReactFlow>

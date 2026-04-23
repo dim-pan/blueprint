@@ -469,10 +469,10 @@
     },
     {
       "ID": "BP-009-VIS-02",
-      "Title": "Top-level overview canvas",
+      "Title": "Component dependency graph in topological order",
       "Priority": "must-have",
       "Pattern": "event-driven",
-      "Statement": "WHEN the user opens the served page in a browser, the Visualiser shall display components and system requirements as nodes on a pan-and-zoom canvas, connected by satisfy and depends_on edges.",
+      "Statement": "WHEN the user opens the served page in a browser, the Visualiser shall display components as nodes on a pan-and-zoom canvas connected by labelled depends_on edges, laid out so that the dependency direction reads consistently across the canvas.",
       "Accept": [],
       "DerivedFrom": "BP-009",
       "AllocatedTo": "COMP-008",
@@ -489,7 +489,7 @@
       "DerivedFrom": "BP-009",
       "AllocatedTo": "COMP-008",
       "SourceFile": "sys/components/visualiser/visualiser.req",
-      "LineNumber": 20
+      "LineNumber": 21
     },
     {
       "ID": "BP-009-VIS-04",
@@ -501,7 +501,7 @@
       "DerivedFrom": "BP-009",
       "AllocatedTo": "COMP-008",
       "SourceFile": "sys/components/visualiser/visualiser.req",
-      "LineNumber": 28
+      "LineNumber": 29
     },
     {
       "ID": "BP-009-VIS-05",
@@ -513,7 +513,7 @@
       "DerivedFrom": "BP-009",
       "AllocatedTo": "COMP-008",
       "SourceFile": "sys/components/visualiser/visualiser.req",
-      "LineNumber": 37
+      "LineNumber": 38
     },
     {
       "ID": "BP-009-VIS-06",
@@ -525,7 +525,7 @@
       "DerivedFrom": "BP-009",
       "AllocatedTo": "COMP-008",
       "SourceFile": "sys/components/visualiser/visualiser.req",
-      "LineNumber": 46
+      "LineNumber": 47
     },
     {
       "ID": "BP-009-VIS-07",
@@ -537,7 +537,43 @@
       "DerivedFrom": "BP-009",
       "AllocatedTo": "COMP-008",
       "SourceFile": "sys/components/visualiser/visualiser.req",
-      "LineNumber": 56
+      "LineNumber": 57
+    },
+    {
+      "ID": "BP-009-VIS-09",
+      "Title": "System requirements list pane",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the served page is loaded, the Visualiser shall display every system requirement in a vertical list pane to the left of the canvas, showing each requirement's id and title, color coded to indicate whether the requirement is satisfied by at least one component.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 65
+    },
+    {
+      "ID": "BP-009-VIS-10",
+      "Title": "Hovering a req pill highlights satisfying components",
+      "Priority": "should-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user hovers over a system requirement pill, the Visualiser shall visually emphasise the components that satisfy that requirement and de-emphasise the remaining components on the canvas.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 76
+    },
+    {
+      "ID": "BP-009-VIS-11",
+      "Title": "Clicking a req pill opens its details",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user clicks a system requirement pill, the Visualiser shall open the detail pane showing the requirement's fields including statement, priority, and source location.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 85
     },
     {
       "ID": "BP-009-VIS-08",
@@ -549,7 +585,7 @@
       "DerivedFrom": "BP-009",
       "AllocatedTo": "COMP-008",
       "SourceFile": "sys/components/visualiser/visualiser.req",
-      "LineNumber": 64
+      "LineNumber": 94
     }
   ],
   "test_specs": [
@@ -590,6 +626,18 @@
       "LineNumber": 22
     },
     {
+      "ID": "TC-VIS-02-02",
+      "Title": "Components are arranged in dependency order",
+      "Verifies": [
+        "BP-009-VIS-02"
+      ],
+      "Given": "the top canvas is rendered for a model containing component A which depends on component B",
+      "When": "",
+      "Expect": "component A is positioned further along the dependency direction than component B, and the edge connecting them is labelled \"depends on\"",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 29
+    },
+    {
       "ID": "TC-VIS-03-01",
       "Title": "Clicking a component opens the detail pane",
       "Verifies": [
@@ -599,7 +647,7 @@
       "When": "the user clicks that component node",
       "Expect": "a detail pane is visible alongside the canvas and its header shows the clicked component's id and name",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 31
+      "LineNumber": 39
     },
     {
       "ID": "TC-VIS-03-02",
@@ -611,7 +659,7 @@
       "When": "the user clicks an empty area of the top canvas",
       "Expect": "the detail pane is closed",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 40
+      "LineNumber": 48
     },
     {
       "ID": "TC-VIS-04-01",
@@ -623,7 +671,7 @@
       "When": "",
       "Expect": "the pane initially displays the list view",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 48
+      "LineNumber": 56
     },
     {
       "ID": "TC-VIS-04-02",
@@ -635,7 +683,7 @@
       "When": "the user activates the canvas toggle",
       "Expect": "the pane displays the canvas view for the same component without closing the pane",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 54
+      "LineNumber": 62
     },
     {
       "ID": "TC-VIS-05-01",
@@ -647,7 +695,7 @@
       "When": "",
       "Expect": "each derived requirement is rendered with its verifying test specs visually grouped below it",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 63
+      "LineNumber": 71
     },
     {
       "ID": "TC-VIS-05-02",
@@ -659,7 +707,7 @@
       "When": "the user opens its detail pane in list view",
       "Expect": "the list view renders an empty-state message instead of an empty section",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 71
+      "LineNumber": 79
     },
     {
       "ID": "TC-VIS-06-01",
@@ -671,7 +719,7 @@
       "When": "",
       "Expect": "the sub-canvas renders nodes for the component, its derived requirements, its verifying test specs, and the system requirements it satisfies",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 80
+      "LineNumber": 88
     },
     {
       "ID": "TC-VIS-07-01",
@@ -683,7 +731,55 @@
       "When": "",
       "Expect": "the element's source_file path and line_number are visible in the pane",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 91
+      "LineNumber": 99
+    },
+    {
+      "ID": "TC-VIS-09-01",
+      "Title": "All system requirements appear in the list",
+      "Verifies": [
+        "BP-009-VIS-09"
+      ],
+      "Given": "the page is loaded for a model with N system requirements",
+      "When": "",
+      "Expect": "the left-hand list pane contains N entries, one per system requirement, each showing the requirement's id and title",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 108
+    },
+    {
+      "ID": "TC-VIS-09-02",
+      "Title": "Unallocated requirements are visually distinct",
+      "Verifies": [
+        "BP-009-VIS-09"
+      ],
+      "Given": "a model containing at least one system requirement not satisfied by any component",
+      "When": "",
+      "Expect": "the corresponding list entry is rendered with the unallocated colour, visually distinct from satisfied entries",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 116
+    },
+    {
+      "ID": "TC-VIS-10-01",
+      "Title": "Hover emphasises satisfying components",
+      "Verifies": [
+        "BP-009-VIS-10"
+      ],
+      "Given": "a system requirement entry in the list pane for a req satisfied by one component and not by another",
+      "When": "the user hovers over that entry",
+      "Expect": "the satisfying component node is visually emphasised and the non-satisfying component is visually de-emphasised",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 126
+    },
+    {
+      "ID": "TC-VIS-11-01",
+      "Title": "Click opens the detail pane",
+      "Verifies": [
+        "BP-009-VIS-11"
+      ],
+      "Given": "the system requirements list pane is visible",
+      "When": "the user clicks a system requirement entry",
+      "Expect": "the detail pane opens and its content shows the clicked requirement's statement, priority, and source file location",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 138
     },
     {
       "ID": "TC-VIS-08-01",
@@ -695,7 +791,7 @@
       "When": "the server is started",
       "Expect": "the server accepts GET /api/model on that port and returns the JSON model",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 100
+      "LineNumber": 148
     },
     {
       "ID": "TC-VIS-08-02",
@@ -707,7 +803,7 @@
       "When": "the server is initialised",
       "Expect": "the listen address resolves to :8080",
       "SourceFile": "sys/components/visualiser/visualiser.testspec",
-      "LineNumber": 107
+      "LineNumber": 155
     },
     {
       "ID": "TC-SYS-028",

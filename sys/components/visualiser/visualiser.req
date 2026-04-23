@@ -8,14 +8,15 @@ req BP-009-VIS-01 "Serve model as JSON"
   interfaces, and test specifications parsed from the
   model directory.
 
-req BP-009-VIS-02 "Top-level overview canvas"
+req BP-009-VIS-02 "Component dependency graph in topological order"
   derived_from: BP-009
   allocated_to: COMP-008
   priority: must-have
   WHEN the user opens the served page in a browser,
-  the Visualiser shall display components and system
-  requirements as nodes on a pan-and-zoom canvas,
-  connected by satisfy and depends_on edges.
+  the Visualiser shall display components as nodes on
+  a pan-and-zoom canvas connected by labelled depends_on
+  edges, laid out so that the dependency direction reads
+  consistently across the canvas.
 
 req BP-009-VIS-03 "Component detail pane on click"
   derived_from: BP-009
@@ -60,6 +61,35 @@ req BP-009-VIS-07 "Source file and line visible for elements"
   WHEN the user selects any model element in the
   Visualiser, its source file path and line number
   shall be displayed in the user interface.
+
+req BP-009-VIS-09 "System requirements list pane"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: must-have
+  WHEN the served page is loaded,
+  the Visualiser shall display every system requirement
+  in a vertical list pane to the left of the canvas,
+  showing each requirement's id and title, color coded
+  to indicate whether the requirement is satisfied by
+  at least one component.
+
+req BP-009-VIS-10 "Hovering a req pill highlights satisfying components"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: should-have
+  WHEN the user hovers over a system requirement pill,
+  the Visualiser shall visually emphasise the components
+  that satisfy that requirement and de-emphasise the
+  remaining components on the canvas.
+
+req BP-009-VIS-11 "Clicking a req pill opens its details"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: must-have
+  WHEN the user clicks a system requirement pill,
+  the Visualiser shall open the detail pane showing
+  the requirement's fields including statement,
+  priority, and source location.
 
 req BP-009-VIS-08 "Single-port local server"
   derived_from: BP-009

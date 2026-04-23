@@ -136,6 +136,7 @@ func parseTestBlock(path string, lines []string, start int) (TestSpec, int, erro
 }
 
 func collectContinuation(lines []string, start int, keyPrefix string, knownKeys []string) (string, int) {
+	keyIndent := leadingWhitespace(lines[start])
 	first := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(lines[start]), keyPrefix))
 	var parts []string
 	if first != "" {
@@ -151,11 +152,22 @@ func collectContinuation(lines []string, start int, keyPrefix string, knownKeys 
 		if !isIndented(raw) {
 			break
 		}
-		if isKnownKeyLine(trimmed, knownKeys) {
+		if leadingWhitespace(raw) <= keyIndent && isKnownKeyLine(trimmed, knownKeys) {
 			break
 		}
 		parts = append(parts, trimmed)
 		i++
 	}
 	return joinStatement(parts), i
+}
+
+func leadingWhitespace(s string) int {
+	n := 0
+	for _, c := range s {
+		if c != ' ' && c != '\t' {
+			break
+		}
+		n++
+	}
+	return n
 }

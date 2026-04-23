@@ -1,0 +1,89 @@
+## BP-CLI-01: Validate command
+
+test TC-CLI-01-01 "Validate a clean model prints valid and exits zero"
+  verifies: BP-CLI-01
+  given: a model directory whose parsed SystemModel has no
+         validation errors
+  when: the user runs "blueprint validate <dir>"
+  expect: stdout includes the word "valid", exit code is 0
+
+test TC-CLI-01-02 "Validate a broken model prints errors and exits non-zero"
+  verifies: BP-CLI-01
+  given: a model directory whose parsed SystemModel produces
+         at least one validation error
+  when: the user runs "blueprint validate <dir>"
+  expect: stdout or stderr includes the error message with
+          file path and line number, exit code is non-zero
+
+test TC-CLI-01-03 "Parse error prints file path and exits non-zero"
+  verifies: BP-CLI-01
+  given: a model directory where one .req file has a syntax error
+  when: the user runs "blueprint validate <dir>"
+  expect: output contains the offending file name and exit code
+          is non-zero
+
+## BP-CLI-04: Trace command
+
+test TC-CLI-04-01 "Forward trace prints satisfied_by and verified_by"
+  verifies: BP-CLI-04
+  given: a model directory where REQ-001 is satisfied by COMP-A
+         and verified by TC-001
+  when: the user runs "blueprint trace REQ-001 <dir>"
+  expect: stdout contains "COMP-A" and "TC-001", exit code is 0
+
+test TC-CLI-04-02 "Backward trace from test spec lists requirements"
+  verifies: BP-CLI-04
+  given: a model directory where TC-001 verifies REQ-001
+  when: the user runs "blueprint trace TC-001 backward <dir>"
+  expect: stdout contains "REQ-001", exit code is 0
+
+test TC-CLI-04-03 "Trace of unknown id exits non-zero"
+  verifies: BP-CLI-04
+  given: a model directory with no element id "REQ-NONE"
+  when: the user runs "blueprint trace REQ-NONE <dir>"
+  expect: exit code is non-zero
+
+## BP-CLI-05: Verify command
+
+test TC-CLI-05-01 "Verify prints coverage percentage"
+  verifies: BP-CLI-05
+  given: a model directory with at least one verified requirement
+  when: the user runs "blueprint verify <dir>"
+  expect: stdout contains a percentage and the coverage
+          summary line
+
+test TC-CLI-05-02 "Verify lists uncovered requirements"
+  verifies: BP-CLI-05
+  given: a model directory with one requirement and no test specs
+  when: the user runs "blueprint verify <dir>"
+  expect: stdout lists the uncovered requirement id,
+          exit code is non-zero
+
+test TC-CLI-05-03 "Verify returns zero when fully covered and allocated"
+  verifies: BP-CLI-05
+  given: a model where every requirement is verified and every
+         system requirement is satisfied by a component
+  when: the user runs "blueprint verify <dir>"
+  expect: exit code is 0
+
+## BP-CLI-06: Model directory option
+
+test TC-CLI-06-01 "Positional directory argument is used"
+  verifies: BP-CLI-06
+  given: a valid model directory at path "./custom/sys"
+  when: the user runs "blueprint validate ./custom/sys"
+  expect: the CLI parses that directory (not the default sys/)
+          and exits 0
+
+test TC-CLI-06-02 "Default directory is sys when no argument given"
+  verifies: BP-CLI-06
+  given: a working directory containing a valid sys/ folder
+  when: the user runs "blueprint validate" with no path
+  expect: the CLI reads from "sys" relative to the working
+          directory and exits 0
+
+test TC-CLI-06-03 "Unknown subcommand prints usage and exits non-zero"
+  verifies: BP-CLI-06
+  given: an invocation "blueprint bogus"
+  expect: stderr contains "usage" or "unknown command", exit
+          code is non-zero

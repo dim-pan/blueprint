@@ -1,0 +1,74 @@
+## BP-006-CA01: Identify uncovered requirements
+
+test TC-CA01-01 "Requirement verified by a test spec is covered"
+  verifies: BP-006-CA01
+  given: REQ-001 exists and TC-001 verifies REQ-001
+  when: Analyse is called
+  expect: the Report.uncovered_requirements list does not
+          include "REQ-001"
+
+test TC-CA01-02 "Requirement with no verifying test spec is uncovered"
+  verifies: BP-006-CA01
+  given: REQ-002 exists and no test spec verifies it
+  when: Analyse is called
+  expect: Report.uncovered_requirements includes "REQ-002"
+
+test TC-CA01-03 "Applies to derived requirements as well"
+  verifies: BP-006-CA01
+  given: a derived requirement REQ-001-A exists and has no
+         verifying test spec
+  when: Analyse is called
+  expect: Report.uncovered_requirements includes "REQ-001-A"
+
+## BP-006-CA02: Identify unallocated requirements
+
+test TC-CA02-01 "System requirement satisfied by a component is allocated"
+  verifies: BP-006-CA02
+  given: REQ-001 is a system-level requirement and COMP-A has
+         satisfies: REQ-001
+  when: Analyse is called
+  expect: Report.unallocated_requirements does not include "REQ-001"
+
+test TC-CA02-02 "System requirement with no satisfying component is unallocated"
+  verifies: BP-006-CA02
+  given: REQ-002 is a system-level requirement and no component
+         lists it in satisfies
+  when: Analyse is called
+  expect: Report.unallocated_requirements includes "REQ-002"
+
+test TC-CA02-03 "Derived requirements are not checked for allocation"
+  verifies: BP-006-CA02
+  given: REQ-001-A is a derived requirement (has derived_from)
+         and no component lists it in satisfies
+  when: Analyse is called
+  expect: Report.unallocated_requirements does not include
+          "REQ-001-A"
+
+## BP-006-CA03: Report coverage metrics
+
+test TC-CA03-01 "Total counts every requirement"
+  verifies: BP-006-CA03
+  given: a SystemModel with four requirements (two system-level,
+         two derived)
+  when: Analyse is called
+  expect: Report.total_requirements: 4
+
+test TC-CA03-02 "Covered count reflects verified requirements"
+  verifies: BP-006-CA03
+  given: four requirements of which three are verified by at
+         least one test spec
+  when: Analyse is called
+  expect: Report.covered_requirements: 3
+
+test TC-CA03-03 "Coverage percentage is the covered fraction"
+  verifies: BP-006-CA03
+  given: four requirements and three covered
+  when: Analyse is called
+  expect: Report.coverage_percentage is 75.0
+
+test TC-CA03-04 "Empty model reports 0 total and 0 percent"
+  verifies: BP-006-CA03
+  given: a SystemModel with no requirements
+  when: Analyse is called
+  expect: Report.total_requirements: 0, covered_requirements: 0,
+          and coverage_percentage: 0.0

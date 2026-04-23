@@ -1,6 +1,7 @@
 interface CoverageReport {
-  total_requirements:     Integer
-  covered_requirements:   Integer
-  uncovered_requirements: String[]
-  coverage_percentage:    Float
+  total_requirements:       Integer
+  covered_requirements:     Integer
+  uncovered_requirements:   String[]
+  unallocated_requirements: String[]
+  coverage_percentage:      Float
 }

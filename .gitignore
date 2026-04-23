@@ -9,3 +9,4 @@ resources/*.txt
 # The system model (sys/) is authoritative. When blueprint can self-host,
 # src/ may become gitignored and regenerated as a build step.
 # src/
+.claude/settings.local.json

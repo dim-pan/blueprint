@@ -1,0 +1,74 @@
+## BP-005-T01: Forward tracing
+
+test TC-T01-01 "Forward trace returns satisfying components"
+  verifies: BP-005-T01
+  given: a SystemModel where COMP-A satisfies REQ-001 and
+         COMP-B does not
+  when: the Tracer is queried forward with from_id REQ-001
+  expect: the returned chain for REQ-001 has satisfied_by
+          including "COMP-A" and not "COMP-B"
+
+test TC-T01-02 "Forward trace returns verifying test specs"
+  verifies: BP-005-T01
+  given: a SystemModel where TC-001 verifies REQ-001
+  when: the Tracer is queried forward with from_id REQ-001
+  expect: the returned chain for REQ-001 has verified_by
+          including "TC-001"
+
+test TC-T01-03 "Allocated derived requirements count toward satisfying"
+  verifies: BP-005-T01
+  given: a derived requirement REQ-001-A with allocated_to COMP-X,
+         and COMP-X does not list REQ-001-A in satisfies
+  when: the Tracer is queried forward with from_id REQ-001-A
+  expect: satisfied_by includes "COMP-X"
+
+## BP-005-T02: Backward tracing
+
+test TC-T02-01 "Backward from test spec returns verified requirements"
+  verifies: BP-005-T02
+  given: TC-001 verifies REQ-001 and REQ-002
+  when: the Tracer is queried backward with from_id TC-001
+  expect: the TraceResult contains chains for REQ-001 and REQ-002
+
+test TC-T02-02 "Backward from component returns allocated requirements"
+  verifies: BP-005-T02
+  given: COMP-X satisfies REQ-001 and REQ-002-A is allocated_to COMP-X
+  when: the Tracer is queried backward with from_id COMP-X
+  expect: the TraceResult contains chains for REQ-001 and REQ-002-A
+
+## BP-005-T03: Derived requirement chain
+
+test TC-T03-01 "Ancestor chain walks derived_from links"
+  verifies: BP-005-T03
+  given: REQ-001 is system-level and REQ-001-A derives from REQ-001
+  when: AncestorChain is called with REQ-001-A
+  expect: the returned chain is ["REQ-001-A", "REQ-001"]
+
+test TC-T03-02 "System-level requirement has a chain of length one"
+  verifies: BP-005-T03
+  given: REQ-001 is a system-level requirement with no derived_from
+  when: AncestorChain is called with REQ-001
+  expect: the returned chain is ["REQ-001"]
+
+test TC-T03-03 "Broken derived_from stops the chain"
+  verifies: BP-005-T03
+  given: REQ-X has derived_from REQ-MISSING which does not exist
+  when: AncestorChain is called with REQ-X
+  expect: the returned chain stops at REQ-X and does not
+          attempt to follow a missing link
+
+## BP-005-T04: Full traceability matrix
+
+test TC-T04-01 "Matrix contains a chain for every requirement"
+  verifies: BP-005-T04
+  given: a SystemModel with three requirements
+  when: Matrix is called
+  expect: the TraceResult contains three chains, one per
+          requirement, in requirements-list order
+
+test TC-T04-02 "Matrix chains include satisfied_by and verified_by"
+  verifies: BP-005-T04
+  given: REQ-001 is satisfied by COMP-A and verified by TC-001
+  when: Matrix is called
+  expect: the chain for REQ-001 has satisfied_by ["COMP-A"]
+          and verified_by ["TC-001"]

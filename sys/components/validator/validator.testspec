@@ -1,0 +1,149 @@
+## BP-002-V01: Validate satisfies references
+
+test TC-V01-01 "Valid satisfies resolves"
+  verifies: BP-002-V01
+  given: a SystemModel where component COMP-001 has satisfies: REQ-001
+         and REQ-001 exists in the requirements list
+  expect: ValidationResult.valid: true
+
+test TC-V01-02 "Broken satisfies reported"
+  verifies: BP-002-V01
+  given: a component with satisfies: REQ-NONEXISTENT
+  expect: ValidationResult.valid: false with one error whose
+          message references "satisfies" and "REQ-NONEXISTENT"
+
+## BP-002-V02: Validate verifies references
+
+test TC-V02-01 "Valid verifies resolves"
+  verifies: BP-002-V02
+  given: a test spec with verifies: REQ-001 and REQ-001 exists
+  expect: ValidationResult.valid: true
+
+test TC-V02-02 "Broken verifies reported"
+  verifies: BP-002-V02
+  given: a test spec with verifies: REQ-NONEXISTENT
+  expect: ValidationResult.valid: false with an error message
+          referencing "verifies" and "REQ-NONEXISTENT"
+
+## BP-002-V03: Validate derived_from references
+
+test TC-V03-01 "derived_from resolves to system-level requirement"
+  verifies: BP-002-V03
+  given: a derived requirement with derived_from: REQ-001 where
+         REQ-001 is itself a system-level requirement
+  expect: ValidationResult.valid: true
+
+test TC-V03-02 "derived_from pointing to another derived req is an error"
+  verifies: BP-002-V03
+  given: a derived requirement REQ-A-01 whose derived_from points
+         at another derived requirement REQ-A (which itself has a
+         derived_from)
+  expect: an error message referencing "derived_from" and noting
+          it must point at a system-level requirement
+
+test TC-V03-03 "derived_from pointing at nothing is an error"
+  verifies: BP-002-V03
+  given: a derived requirement with derived_from: REQ-MISSING
+  expect: ValidationResult.valid: false
+
+## BP-002-V04: Validate allocated_to references
+
+test TC-V04-01 "allocated_to resolves"
+  verifies: BP-002-V04
+  given: a derived requirement with allocated_to: COMP-001 where
+         COMP-001 exists
+  expect: ValidationResult.valid: true
+
+test TC-V04-02 "Broken allocated_to reported"
+  verifies: BP-002-V04
+  given: a derived requirement with allocated_to: COMP-MISSING
+  expect: ValidationResult.valid: false with a message referencing
+          "allocated_to" and "COMP-MISSING"
+
+## BP-002-V05: Validate depends_on references
+
+test TC-V05-01 "depends_on resolves"
+  verifies: BP-002-V05
+  given: a component with depends_on: COMP-001 where COMP-001 exists
+  expect: ValidationResult.valid: true
+
+test TC-V05-02 "Broken depends_on reported"
+  verifies: BP-002-V05
+  given: a component with depends_on: COMP-MISSING
+  expect: ValidationResult.valid: false with a message referencing
+          "depends_on" and "COMP-MISSING"
+
+## BP-002-V06: Validate interface type references
+
+test TC-V06-01 "Primitive types accepted"
+  verifies: BP-002-V06
+  given: an interface whose fields use String, Integer, Boolean,
+         Float, and Timestamp
+  expect: ValidationResult.valid: true
+
+test TC-V06-02 "Reference to another interface accepted"
+  verifies: BP-002-V06
+  given: interface A with a field typed as another interface B,
+         where B is defined in the same model
+  expect: ValidationResult.valid: true
+
+test TC-V06-03 "Array base type is checked"
+  verifies: BP-002-V06
+  given: an interface with a field typed as "Unknown[]" where
+         Unknown is neither a primitive nor a defined interface
+  expect: ValidationResult.valid: false referencing "Unknown"
+
+test TC-V06-04 "Union types are not resolved against interfaces"
+  verifies: BP-002-V06
+  given: an interface with a field typed as "red | green | blue"
+  expect: ValidationResult.valid: true
+
+test TC-V06-05 "Unknown scalar type is reported"
+  verifies: BP-002-V06
+  given: an interface with a field typed as "Widget" where
+         Widget is neither a primitive nor a defined interface
+  expect: ValidationResult.valid: false referencing "Widget"
+
+## BP-002-V07: Detect duplicate identifiers
+
+test TC-V07-01 "Duplicate requirement ids reported"
+  verifies: BP-002-V07
+  given: two requirements sharing id "REQ-001"
+  expect: ValidationResult.valid: false with an error per occurrence
+          referencing "REQ-001" and "duplicate"
+
+test TC-V07-02 "Duplicate component ids reported"
+  verifies: BP-002-V07
+  given: two components sharing id "COMP-001"
+  expect: ValidationResult.valid: false
+
+test TC-V07-03 "Duplicate interface names reported"
+  verifies: BP-002-V07
+  given: two interfaces sharing name "Todo"
+  expect: ValidationResult.valid: false
+
+test TC-V07-04 "Duplicate test spec ids reported"
+  verifies: BP-002-V07
+  given: two test specs sharing id "TC-001"
+  expect: ValidationResult.valid: false
+
+## BP-003-V01: Error location reporting
+
+test TC-V08-01 "Error carries offending element's source location"
+  verifies: BP-003-V01
+  given: a component with a broken satisfies reference located
+         at components/foo/foo.component line 3
+  expect: the ValidationError has source_file ending with
+          "foo.component" and line_number: 3
+
+## BP-003-V02: Non-zero exit signal
+
+test TC-V09-01 "Any error marks result invalid"
+  verifies: BP-003-V02
+  given: a SystemModel producing at least one validation error
+  expect: ValidationResult.valid: false
+
+test TC-V09-02 "No errors marks result valid"
+  verifies: BP-003-V02
+  given: a SystemModel where every cross-reference resolves
+  expect: ValidationResult.valid: true and errors list is empty

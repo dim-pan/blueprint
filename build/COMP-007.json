@@ -1,0 +1,1122 @@
+{
+  "component": {
+    "ID": "COMP-007",
+    "Name": "CLI",
+    "Responsibility": "Expose all system operations to the user via a command-line interface. Route user commands to the appropriate components and present results.",
+    "DependsOn": [
+      "COMP-001",
+      "COMP-002",
+      "COMP-003",
+      "COMP-004",
+      "COMP-005"
+    ],
+    "Satisfies": [],
+    "SourceFile": "sys/components/cli/cli.component",
+    "LineNumber": 1
+  },
+  "interfaces": [
+    {
+      "Name": "AgentContext",
+      "Fields": [
+        {
+          "Name": "component",
+          "Type": "Component",
+          "Optional": false
+        },
+        {
+          "Name": "interfaces",
+          "Type": "InterfaceDefinition[]",
+          "Optional": false
+        },
+        {
+          "Name": "requirements",
+          "Type": "Requirement[]",
+          "Optional": false
+        },
+        {
+          "Name": "test_specs",
+          "Type": "TestSpec[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/agent-context.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "ChangeSet",
+      "Fields": [
+        {
+          "Name": "affected_components",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "changes",
+          "Type": "Change[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/change-set.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "Change",
+      "Fields": [
+        {
+          "Name": "file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "element_id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "change_type",
+          "Type": "added | modified | removed",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/change-set.iface",
+      "LineNumber": 6
+    },
+    {
+      "Name": "CoverageReport",
+      "Fields": [
+        {
+          "Name": "total_requirements",
+          "Type": "Integer",
+          "Optional": false
+        },
+        {
+          "Name": "covered_requirements",
+          "Type": "Integer",
+          "Optional": false
+        },
+        {
+          "Name": "uncovered_requirements",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "unallocated_requirements",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "coverage_percentage",
+          "Type": "Float",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/coverage-report.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "Requirement",
+      "Fields": [
+        {
+          "Name": "id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "title",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "priority",
+          "Type": "must-have | should-have | nice-to-have",
+          "Optional": false
+        },
+        {
+          "Name": "pattern",
+          "Type": "ubiquitous | event-driven | unwanted | state-driven | optional",
+          "Optional": false
+        },
+        {
+          "Name": "statement",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "accept",
+          "Type": "AcceptanceCriterion[]",
+          "Optional": false
+        },
+        {
+          "Name": "derived_from",
+          "Type": "String",
+          "Optional": true
+        },
+        {
+          "Name": "allocated_to",
+          "Type": "String",
+          "Optional": true
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "AcceptanceCriterion",
+      "Fields": [
+        {
+          "Name": "description",
+          "Type": "String",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 14
+    },
+    {
+      "Name": "Component",
+      "Fields": [
+        {
+          "Name": "id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "name",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "responsibility",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "depends_on",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "satisfies",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 18
+    },
+    {
+      "Name": "InterfaceDefinition",
+      "Fields": [
+        {
+          "Name": "name",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "fields",
+          "Type": "Field[]",
+          "Optional": false
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 28
+    },
+    {
+      "Name": "Field",
+      "Fields": [
+        {
+          "Name": "name",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "type",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "optional",
+          "Type": "Boolean",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 35
+    },
+    {
+      "Name": "TestSpec",
+      "Fields": [
+        {
+          "Name": "id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "title",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "verifies",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "given",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "when",
+          "Type": "String",
+          "Optional": true
+        },
+        {
+          "Name": "expect",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 41
+    },
+    {
+      "Name": "SystemModel",
+      "Fields": [
+        {
+          "Name": "requirements",
+          "Type": "Requirement[]",
+          "Optional": false
+        },
+        {
+          "Name": "components",
+          "Type": "Component[]",
+          "Optional": false
+        },
+        {
+          "Name": "interfaces",
+          "Type": "InterfaceDefinition[]",
+          "Optional": false
+        },
+        {
+          "Name": "test_specs",
+          "Type": "TestSpec[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/system-model.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "TraceChain",
+      "Fields": [
+        {
+          "Name": "requirement_id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "satisfied_by",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "verified_by",
+          "Type": "String[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/trace-chain.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "TraceQuery",
+      "Fields": [
+        {
+          "Name": "from_id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "direction",
+          "Type": "forward | backward",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/trace-chain.iface",
+      "LineNumber": 7
+    },
+    {
+      "Name": "TraceResult",
+      "Fields": [
+        {
+          "Name": "chains",
+          "Type": "TraceChain[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/trace-chain.iface",
+      "LineNumber": 12
+    },
+    {
+      "Name": "ValidationResult",
+      "Fields": [
+        {
+          "Name": "valid",
+          "Type": "Boolean",
+          "Optional": false
+        },
+        {
+          "Name": "errors",
+          "Type": "ValidationError[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/validation-result.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "ValidationError",
+      "Fields": [
+        {
+          "Name": "message",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        },
+        {
+          "Name": "severity",
+          "Type": "error | warning",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/validation-result.iface",
+      "LineNumber": 6
+    }
+  ],
+  "requirements": [
+    {
+      "ID": "BP-CLI-01",
+      "Title": "Validate command",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user runs the validate command, the CLI shall invoke the Parser and Validator and display the results to the user.",
+      "Accept": [],
+      "DerivedFrom": "BP-002",
+      "AllocatedTo": "COMP-007",
+      "SourceFile": "sys/components/cli/cli.req",
+      "LineNumber": 1
+    },
+    {
+      "ID": "BP-002",
+      "Title": "Model validation",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user requests validation, the system shall verify that the system model is internally consistent and all cross-references resolve.",
+      "Accept": [],
+      "DerivedFrom": "",
+      "AllocatedTo": "",
+      "SourceFile": "sys/requirements/blueprint.req",
+      "LineNumber": 6
+    },
+    {
+      "ID": "BP-CLI-02",
+      "Title": "Assemble command",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user runs the assemble command, the CLI shall invoke the Parser, Validator, and Assembler and write the generated context to disk.",
+      "Accept": [],
+      "DerivedFrom": "BP-004",
+      "AllocatedTo": "COMP-007",
+      "SourceFile": "sys/components/cli/cli.req",
+      "LineNumber": 9
+    },
+    {
+      "ID": "BP-004",
+      "Title": "Agent context generation",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user requests context assembly, the system shall produce a resolved context for each affected component, suitable for consumption by an AI coding agent.",
+      "Accept": [],
+      "DerivedFrom": "",
+      "AllocatedTo": "",
+      "SourceFile": "sys/requirements/blueprint.req",
+      "LineNumber": 18
+    },
+    {
+      "ID": "BP-CLI-03",
+      "Title": "Sync command",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user runs the sync command, the CLI shall invoke the ChangeDetector and Assembler and regenerate only the affected components.",
+      "Accept": [],
+      "DerivedFrom": "BP-008",
+      "AllocatedTo": "COMP-007",
+      "SourceFile": "sys/components/cli/cli.req",
+      "LineNumber": 17
+    },
+    {
+      "ID": "BP-008",
+      "Title": "Incremental sync",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user requests a sync, the system shall regenerate only the components affected by model changes, not the entire codebase.",
+      "Accept": [],
+      "DerivedFrom": "",
+      "AllocatedTo": "",
+      "SourceFile": "sys/requirements/blueprint.req",
+      "LineNumber": 31
+    },
+    {
+      "ID": "BP-CLI-04",
+      "Title": "Trace command",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user runs the trace command with an element id, the CLI shall invoke the Tracer and display the traceability chain for that element.",
+      "Accept": [],
+      "DerivedFrom": "BP-005",
+      "AllocatedTo": "COMP-007",
+      "SourceFile": "sys/components/cli/cli.req",
+      "LineNumber": 25
+    },
+    {
+      "ID": "BP-005",
+      "Title": "Traceability",
+      "Priority": "must-have",
+      "Pattern": "ubiquitous",
+      "Statement": "The system shall maintain traceability from requirements to components to test specifications.",
+      "Accept": [],
+      "DerivedFrom": "",
+      "AllocatedTo": "",
+      "SourceFile": "sys/requirements/blueprint.req",
+      "LineNumber": 37
+    },
+    {
+      "ID": "BP-CLI-05",
+      "Title": "Verify command",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user runs the verify command, the CLI shall invoke the CoverageAnalyser and display the coverage report.",
+      "Accept": [],
+      "DerivedFrom": "BP-006",
+      "AllocatedTo": "COMP-007",
+      "SourceFile": "sys/components/cli/cli.req",
+      "LineNumber": 33
+    },
+    {
+      "ID": "BP-006",
+      "Title": "Coverage analysis",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user requests verification, the system shall identify any requirements not covered by at least one test specification.",
+      "Accept": [],
+      "DerivedFrom": "",
+      "AllocatedTo": "",
+      "SourceFile": "sys/requirements/blueprint.req",
+      "LineNumber": 42
+    },
+    {
+      "ID": "BP-CLI-06",
+      "Title": "Model directory option",
+      "Priority": "must-have",
+      "Pattern": "ubiquitous",
+      "Statement": "The CLI shall accept a path to the system model directory, defaulting to sys/ in the current working directory.",
+      "Accept": [],
+      "DerivedFrom": "BP-001",
+      "AllocatedTo": "COMP-007",
+      "SourceFile": "sys/components/cli/cli.req",
+      "LineNumber": 41
+    },
+    {
+      "ID": "BP-001",
+      "Title": "System model definition",
+      "Priority": "must-have",
+      "Pattern": "ubiquitous",
+      "Statement": "The system shall accept a human-readable, text-based system model as the single source of truth for a software system.",
+      "Accept": [],
+      "DerivedFrom": "",
+      "AllocatedTo": "",
+      "SourceFile": "sys/requirements/blueprint.req",
+      "LineNumber": 1
+    },
+    {
+      "ID": "BP-CLI-07",
+      "Title": "Serve command",
+      "Priority": "should-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user runs the serve command, the CLI shall invoke the Visualiser and launch a local HTTP server that renders the system model as an interactive canvas in a browser.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-007",
+      "SourceFile": "sys/components/cli/cli.req",
+      "LineNumber": 48
+    },
+    {
+      "ID": "BP-009",
+      "Title": "Visual model representation",
+      "Priority": "should-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user requests a visual view of the system model, the system shall display the components, their dependencies, interfaces, and traceability links in a graphical format.",
+      "Accept": [],
+      "DerivedFrom": "",
+      "AllocatedTo": "",
+      "SourceFile": "sys/requirements/blueprint.req",
+      "LineNumber": 48
+    }
+  ],
+  "test_specs": [
+    {
+      "ID": "TC-CLI-01-01",
+      "Title": "Validate a clean model prints valid and exits zero",
+      "Verifies": [
+        "BP-CLI-01"
+      ],
+      "Given": "a model directory whose parsed SystemModel has no validation errors",
+      "When": "the user runs \"blueprint validate \u003cdir\u003e\"",
+      "Expect": "stdout includes the word \"valid\", exit code is 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 3
+    },
+    {
+      "ID": "TC-CLI-01-02",
+      "Title": "Validate a broken model prints errors and exits non-zero",
+      "Verifies": [
+        "BP-CLI-01"
+      ],
+      "Given": "a model directory whose parsed SystemModel produces at least one validation error",
+      "When": "the user runs \"blueprint validate \u003cdir\u003e\"",
+      "Expect": "stdout or stderr includes the error message with file path and line number, exit code is non-zero",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 10
+    },
+    {
+      "ID": "TC-CLI-01-03",
+      "Title": "Parse error prints file path and exits non-zero",
+      "Verifies": [
+        "BP-CLI-01"
+      ],
+      "Given": "a model directory where one .req file has a syntax error",
+      "When": "the user runs \"blueprint validate \u003cdir\u003e\"",
+      "Expect": "output contains the offending file name and exit code is non-zero",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 18
+    },
+    {
+      "ID": "TC-CLI-02-01",
+      "Title": "Assemble writes one JSON file per component",
+      "Verifies": [
+        "BP-CLI-02"
+      ],
+      "Given": "a valid model directory with three components and an empty output directory",
+      "When": "the user runs \"blueprint assemble \u003csys-dir\u003e \u003cout-dir\u003e\"",
+      "Expect": "three \u003ccomponent-id\u003e.json files exist under the output directory, exit code is 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 27
+    },
+    {
+      "ID": "TC-CLI-02-02",
+      "Title": "Assemble refuses when model is invalid",
+      "Verifies": [
+        "BP-CLI-02"
+      ],
+      "Given": "a model directory whose parsed SystemModel has a validation error",
+      "When": "the user runs \"blueprint assemble \u003csys-dir\u003e \u003cout-dir\u003e\"",
+      "Expect": "no files are written, exit code is non-zero, stderr mentions the validation error",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 35
+    },
+    {
+      "ID": "TC-CLI-07-01",
+      "Title": "Serve validates port argument",
+      "Verifies": [
+        "BP-CLI-07"
+      ],
+      "Given": "an invocation \"blueprint serve --port not-a-number\"",
+      "When": "",
+      "Expect": "exit code is non-zero and stderr mentions \"port\"",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 45
+    },
+    {
+      "ID": "TC-CLI-07-02",
+      "Title": "Serve rejects missing port value",
+      "Verifies": [
+        "BP-CLI-07"
+      ],
+      "Given": "an invocation \"blueprint serve --port\" with no value",
+      "When": "",
+      "Expect": "exit code is non-zero",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 50
+    },
+    {
+      "ID": "TC-CLI-03-01",
+      "Title": "Sync with no baseline writes everything and saves baseline",
+      "Verifies": [
+        "BP-CLI-03"
+      ],
+      "Given": "a valid model directory and no existing baseline file",
+      "When": "the user runs \"blueprint sync \u003csys-dir\u003e \u003cout-dir\u003e\" from a working directory with no .blueprint/baseline.json",
+      "Expect": "AgentContext files are written for every component, a .blueprint/baseline.json is created, and exit code is 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 57
+    },
+    {
+      "ID": "TC-CLI-03-02",
+      "Title": "Sync with unchanged model writes nothing new",
+      "Verifies": [
+        "BP-CLI-03"
+      ],
+      "Given": "a baseline that matches the current model",
+      "When": "the user runs \"blueprint sync\" again",
+      "Expect": "stdout reports no changes, no files are regenerated, exit code is 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 66
+    },
+    {
+      "ID": "TC-CLI-03-03",
+      "Title": "Sync regenerates only affected components",
+      "Verifies": [
+        "BP-CLI-03"
+      ],
+      "Given": "a baseline and a current model where only one component has changed",
+      "When": "the user runs \"blueprint sync \u003csys-dir\u003e \u003cout-dir\u003e\"",
+      "Expect": "only the affected component's AgentContext is written and the baseline is updated, exit code is 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 73
+    },
+    {
+      "ID": "TC-CLI-04-01",
+      "Title": "Forward trace prints satisfied_by and verified_by",
+      "Verifies": [
+        "BP-CLI-04"
+      ],
+      "Given": "a model directory where REQ-001 is satisfied by COMP-A and verified by TC-001",
+      "When": "the user runs \"blueprint trace REQ-001 \u003cdir\u003e\"",
+      "Expect": "stdout contains \"COMP-A\" and \"TC-001\", exit code is 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 83
+    },
+    {
+      "ID": "TC-CLI-04-02",
+      "Title": "Backward trace from test spec lists requirements",
+      "Verifies": [
+        "BP-CLI-04"
+      ],
+      "Given": "a model directory where TC-001 verifies REQ-001",
+      "When": "the user runs \"blueprint trace TC-001 backward \u003cdir\u003e\"",
+      "Expect": "stdout contains \"REQ-001\", exit code is 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 90
+    },
+    {
+      "ID": "TC-CLI-04-03",
+      "Title": "Trace of unknown id exits non-zero",
+      "Verifies": [
+        "BP-CLI-04"
+      ],
+      "Given": "a model directory with no element id \"REQ-NONE\"",
+      "When": "the user runs \"blueprint trace REQ-NONE \u003cdir\u003e\"",
+      "Expect": "exit code is non-zero",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 96
+    },
+    {
+      "ID": "TC-CLI-05-01",
+      "Title": "Verify prints coverage percentage",
+      "Verifies": [
+        "BP-CLI-05"
+      ],
+      "Given": "a model directory with at least one verified requirement",
+      "When": "the user runs \"blueprint verify \u003cdir\u003e\"",
+      "Expect": "stdout contains a percentage and the coverage summary line",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 104
+    },
+    {
+      "ID": "TC-CLI-05-02",
+      "Title": "Verify lists uncovered requirements",
+      "Verifies": [
+        "BP-CLI-05"
+      ],
+      "Given": "a model directory with one requirement and no test specs",
+      "When": "the user runs \"blueprint verify \u003cdir\u003e\"",
+      "Expect": "stdout lists the uncovered requirement id, exit code is non-zero",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 111
+    },
+    {
+      "ID": "TC-CLI-05-03",
+      "Title": "Verify returns zero when fully covered and allocated",
+      "Verifies": [
+        "BP-CLI-05"
+      ],
+      "Given": "a model where every requirement is verified and every system requirement is satisfied by a component",
+      "When": "the user runs \"blueprint verify \u003cdir\u003e\"",
+      "Expect": "exit code is 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 118
+    },
+    {
+      "ID": "TC-CLI-06-01",
+      "Title": "Positional directory argument is used",
+      "Verifies": [
+        "BP-CLI-06"
+      ],
+      "Given": "a valid model directory at path \"./custom/sys\"",
+      "When": "the user runs \"blueprint validate ./custom/sys\"",
+      "Expect": "the CLI parses that directory (not the default sys/) and exits 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 127
+    },
+    {
+      "ID": "TC-CLI-06-02",
+      "Title": "Default directory is sys when no argument given",
+      "Verifies": [
+        "BP-CLI-06"
+      ],
+      "Given": "a working directory containing a valid sys/ folder",
+      "When": "the user runs \"blueprint validate\" with no path",
+      "Expect": "the CLI reads from \"sys\" relative to the working directory and exits 0",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 134
+    },
+    {
+      "ID": "TC-CLI-06-03",
+      "Title": "Unknown subcommand prints usage and exits non-zero",
+      "Verifies": [
+        "BP-CLI-06"
+      ],
+      "Given": "an invocation \"blueprint bogus\"",
+      "When": "",
+      "Expect": "stderr contains \"usage\" or \"unknown command\", exit code is non-zero",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 141
+    },
+    {
+      "ID": "TC-SYS-001",
+      "Title": "Parse valid system model",
+      "Verifies": [
+        "BP-001"
+      ],
+      "Given": "a sys/ directory containing valid .req, .iface, .component, and .testspec files",
+      "When": "",
+      "Expect": "a structured SystemModel with all elements populated and no errors",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 3
+    },
+    {
+      "ID": "TC-SYS-002",
+      "Title": "Reject non-text model files",
+      "Verifies": [
+        "BP-001"
+      ],
+      "Given": "a sys/ directory containing a binary file with a .req extension",
+      "When": "",
+      "Expect": "a syntax error reported with file path and description",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 10
+    },
+    {
+      "ID": "TC-SYS-003",
+      "Title": "Handle empty model directory",
+      "Verifies": [
+        "BP-001"
+      ],
+      "Given": "a sys/ directory with no model files",
+      "When": "",
+      "Expect": "a valid but empty SystemModel with no errors",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 16
+    },
+    {
+      "ID": "TC-SYS-004",
+      "Title": "Valid model passes validation",
+      "Verifies": [
+        "BP-002"
+      ],
+      "Given": "a SystemModel where all cross-references resolve",
+      "When": "",
+      "Expect": "ValidationResult{valid: true, errors: []}",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 23
+    },
+    {
+      "ID": "TC-SYS-005",
+      "Title": "Broken satisfies reference detected",
+      "Verifies": [
+        "BP-002"
+      ],
+      "Given": "a component with satisfies: REQ-NONEXISTENT",
+      "When": "",
+      "Expect": "ValidationResult{valid: false} with an error referencing the broken link",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 28
+    },
+    {
+      "ID": "TC-SYS-006",
+      "Title": "Broken verifies reference detected",
+      "Verifies": [
+        "BP-002"
+      ],
+      "Given": "a test spec with verifies: REQ-NONEXISTENT",
+      "When": "",
+      "Expect": "ValidationResult{valid: false} with an error referencing the broken link",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 34
+    },
+    {
+      "ID": "TC-SYS-007",
+      "Title": "Broken depends_on reference detected",
+      "Verifies": [
+        "BP-002"
+      ],
+      "Given": "a component with depends_on: COMP-NONEXISTENT",
+      "When": "",
+      "Expect": "ValidationResult{valid: false} with an error referencing the broken link",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 40
+    },
+    {
+      "ID": "TC-SYS-011",
+      "Title": "Assemble context for a single component",
+      "Verifies": [
+        "BP-004"
+      ],
+      "Given": "a valid SystemModel with one component COMP-001 that satisfies REQ-001, consumes InterfaceA, and is verified by TC-001",
+      "When": "context assembly is requested for COMP-001",
+      "Expect": "AgentContext containing the component definition, REQ-001, InterfaceA, and TC-001",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 69
+    },
+    {
+      "ID": "TC-SYS-012",
+      "Title": "Context includes parent system requirements",
+      "Verifies": [
+        "BP-004"
+      ],
+      "Given": "a component with derived requirement BP-001-P01 (derived_from: BP-001)",
+      "When": "context is assembled for that component",
+      "Expect": "AgentContext includes both BP-001-P01 and BP-001",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 78
+    },
+    {
+      "ID": "TC-SYS-013",
+      "Title": "Context resolves interface references",
+      "Verifies": [
+        "BP-004"
+      ],
+      "Given": "a component that consumes InterfaceA, which references InterfaceB in a field type",
+      "When": "context is assembled for that component",
+      "Expect": "AgentContext includes both InterfaceA and InterfaceB",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 85
+    },
+    {
+      "ID": "TC-SYS-014",
+      "Title": "Forward trace from requirement",
+      "Verifies": [
+        "BP-005"
+      ],
+      "Given": "REQ-001 satisfied by COMP-001, verified by TC-001",
+      "When": "forward trace is requested for REQ-001",
+      "Expect": "TraceResult showing COMP-001 in satisfied_by and TC-001 in verified_by",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 94
+    },
+    {
+      "ID": "TC-SYS-015",
+      "Title": "Backward trace from test spec",
+      "Verifies": [
+        "BP-005"
+      ],
+      "Given": "TC-001 verifies REQ-001",
+      "When": "backward trace is requested for TC-001",
+      "Expect": "TraceResult showing REQ-001 as the traced requirement",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 101
+    },
+    {
+      "ID": "TC-SYS-016",
+      "Title": "Trace follows derived_from chain",
+      "Verifies": [
+        "BP-005"
+      ],
+      "Given": "BP-001-P01 derived_from BP-001",
+      "When": "backward trace is requested for BP-001-P01",
+      "Expect": "TraceResult includes BP-001 as the root system requirement",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 107
+    },
+    {
+      "ID": "TC-SYS-017",
+      "Title": "Full traceability matrix",
+      "Verifies": [
+        "BP-005"
+      ],
+      "Given": "a valid SystemModel with requirements, components, and test specs",
+      "When": "full traceability matrix is requested",
+      "Expect": "every requirement appears with its satisfying components and verifying test specs",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 114
+    },
+    {
+      "ID": "TC-SYS-018",
+      "Title": "Detect uncovered requirement",
+      "Verifies": [
+        "BP-006"
+      ],
+      "Given": "REQ-001 has no test spec with verifies: REQ-001",
+      "When": "coverage analysis is requested",
+      "Expect": "CoverageReport with REQ-001 in uncovered_requirements",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 124
+    },
+    {
+      "ID": "TC-SYS-019",
+      "Title": "Detect unallocated requirement",
+      "Verifies": [
+        "BP-006"
+      ],
+      "Given": "REQ-001 has no component with satisfies: REQ-001",
+      "When": "coverage analysis is requested",
+      "Expect": "CoverageReport with REQ-001 in uncovered_requirements",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 130
+    },
+    {
+      "ID": "TC-SYS-020",
+      "Title": "Full coverage reports 100%",
+      "Verifies": [
+        "BP-006"
+      ],
+      "Given": "every requirement is verified by at least one test spec",
+      "When": "coverage analysis is requested",
+      "Expect": "CoverageReport{coverage_percentage: 100.0, uncovered_requirements: []}",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 136
+    },
+    {
+      "ID": "TC-SYS-021",
+      "Title": "Coverage metrics are accurate",
+      "Verifies": [
+        "BP-006"
+      ],
+      "Given": "4 requirements, 3 covered by test specs, 1 uncovered",
+      "When": "coverage analysis is requested",
+      "Expect": "CoverageReport{total_requirements: 4, covered_requirements: 3, coverage_percentage: 75.0}",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 143
+    },
+    {
+      "ID": "TC-SYS-026",
+      "Title": "Sync regenerates only affected components",
+      "Verifies": [
+        "BP-008"
+      ],
+      "Given": "COMP-001 is in the ChangeSet, COMP-003 is not",
+      "When": "sync is requested",
+      "Expect": "context is assembled for COMP-001 only, COMP-003 is untouched",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 179
+    },
+    {
+      "ID": "TC-SYS-027",
+      "Title": "Sync with no changes is a no-op",
+      "Verifies": [
+        "BP-008"
+      ],
+      "Given": "no model files changed since the last sync",
+      "When": "sync is requested",
+      "Expect": "ChangeSet{affected_components: [], changes: []} and no context is assembled",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 186
+    },
+    {
+      "ID": "TC-SYS-028",
+      "Title": "Visual output includes all components",
+      "Verifies": [
+        "BP-009"
+      ],
+      "Given": "a SystemModel with 3 components",
+      "When": "visual representation is requested",
+      "Expect": "output contains all 3 components with their names",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 195
+    },
+    {
+      "ID": "TC-SYS-029",
+      "Title": "Visual output shows dependencies",
+      "Verifies": [
+        "BP-009"
+      ],
+      "Given": "COMP-002 depends_on COMP-001",
+      "When": "visual representation is requested",
+      "Expect": "output shows a dependency link from COMP-002 to COMP-001",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 201
+    },
+    {
+      "ID": "TC-SYS-030",
+      "Title": "Visual output shows traceability",
+      "Verifies": [
+        "BP-009"
+      ],
+      "Given": "COMP-001 satisfies REQ-001, TC-001 verifies REQ-001",
+      "When": "visual representation is requested",
+      "Expect": "output shows satisfy and verify links",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 208
+    }
+  ]
+}

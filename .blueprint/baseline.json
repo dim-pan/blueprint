@@ -289,6 +289,18 @@
       "LineNumber": 41
     },
     {
+      "ID": "BP-CLI-07",
+      "Title": "Serve command",
+      "Priority": "should-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user runs the serve command, the CLI shall invoke the Visualiser and launch a local HTTP server that renders the system model as an interactive canvas in a browser.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-007",
+      "SourceFile": "sys/components/cli/cli.req",
+      "LineNumber": 48
+    },
+    {
       "ID": "BP-006-CA01",
       "Title": "Identify uncovered requirements",
       "Priority": "must-have",
@@ -575,6 +587,102 @@
       "AllocatedTo": "COMP-002",
       "SourceFile": "sys/components/validator/validator.req",
       "LineNumber": 63
+    },
+    {
+      "ID": "BP-009-VIS-01",
+      "Title": "Serve model as JSON",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the visualiser is serving a system model, the HTTP endpoint GET /api/model shall return a JSON document containing all components, requirements, interfaces, and test specifications parsed from the model directory.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 1
+    },
+    {
+      "ID": "BP-009-VIS-02",
+      "Title": "Top-level overview canvas",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user opens the served page in a browser, the Visualiser shall display components and system requirements as nodes on a pan-and-zoom canvas, connected by satisfy and depends_on edges.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 11
+    },
+    {
+      "ID": "BP-009-VIS-03",
+      "Title": "Component detail pane on click",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user clicks a component node in the top canvas, the Visualiser shall open a detail pane alongside the canvas showing that component's scope.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 20
+    },
+    {
+      "ID": "BP-009-VIS-04",
+      "Title": "Detail pane toggles list and canvas views",
+      "Priority": "must-have",
+      "Pattern": "state-driven",
+      "Statement": "WHILE the component detail pane is open, the user shall be able to toggle between a list representation and a local canvas representation of the component's scope.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 28
+    },
+    {
+      "ID": "BP-009-VIS-05",
+      "Title": "List view groups derived reqs with test specs",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the list view is active in the detail pane, the Visualiser shall display the component's derived requirements with each requirement's verifying test specifications nested below it.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 37
+    },
+    {
+      "ID": "BP-009-VIS-06",
+      "Title": "Canvas view shows component local subgraph",
+      "Priority": "should-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the canvas view is active in the detail pane, the Visualiser shall render a graph containing the component, its derived requirements, its verifying test specifications, and the system requirements it satisfies.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 46
+    },
+    {
+      "ID": "BP-009-VIS-07",
+      "Title": "Source file and line visible for elements",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user selects any model element in the Visualiser, its source file path and line number shall be displayed in the user interface.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 56
+    },
+    {
+      "ID": "BP-009-VIS-08",
+      "Title": "Single-port local server",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the serve command is invoked, the Visualiser shall listen on a local TCP port (default 8080) and print the served URL to stdout.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 64
     }
   ],
   "Components": [
@@ -671,6 +779,20 @@
         "BP-003"
       ],
       "SourceFile": "sys/components/validator/validator.component",
+      "LineNumber": 1
+    },
+    {
+      "ID": "COMP-008",
+      "Name": "Visualiser",
+      "Responsibility": "Present the system model as an interactive node-and-edge graph in a local browser canvas. Serve a locally-hosted page that renders components, requirements, interfaces, and test specifications together with their satisfy, verify, derive, and depends_on relationships. Read-only: no edits flow back from the UI.",
+      "DependsOn": [
+        "COMP-001",
+        "COMP-004"
+      ],
+      "Satisfies": [
+        "BP-009"
+      ],
+      "SourceFile": "sys/components/visualiser/visualiser.component",
       "LineNumber": 1
     }
   ],
@@ -1501,6 +1623,30 @@
       "LineNumber": 35
     },
     {
+      "ID": "TC-CLI-07-01",
+      "Title": "Serve validates port argument",
+      "Verifies": [
+        "BP-CLI-07"
+      ],
+      "Given": "an invocation \"blueprint serve --port not-a-number\"",
+      "When": "",
+      "Expect": "exit code is non-zero and stderr mentions \"port\"",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 45
+    },
+    {
+      "ID": "TC-CLI-07-02",
+      "Title": "Serve rejects missing port value",
+      "Verifies": [
+        "BP-CLI-07"
+      ],
+      "Given": "an invocation \"blueprint serve --port\" with no value",
+      "When": "",
+      "Expect": "exit code is non-zero",
+      "SourceFile": "sys/components/cli/cli.testspec",
+      "LineNumber": 50
+    },
+    {
       "ID": "TC-CLI-03-01",
       "Title": "Sync with no baseline writes everything and saves baseline",
       "Verifies": [
@@ -1510,7 +1656,7 @@
       "When": "the user runs \"blueprint sync \u003csys-dir\u003e \u003cout-dir\u003e\" from a working directory with no .blueprint/baseline.json",
       "Expect": "AgentContext files are written for every component, a .blueprint/baseline.json is created, and exit code is 0",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 45
+      "LineNumber": 57
     },
     {
       "ID": "TC-CLI-03-02",
@@ -1522,7 +1668,7 @@
       "When": "the user runs \"blueprint sync\" again",
       "Expect": "stdout reports no changes, no files are regenerated, exit code is 0",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 54
+      "LineNumber": 66
     },
     {
       "ID": "TC-CLI-03-03",
@@ -1534,7 +1680,7 @@
       "When": "the user runs \"blueprint sync \u003csys-dir\u003e \u003cout-dir\u003e\"",
       "Expect": "only the affected component's AgentContext is written and the baseline is updated, exit code is 0",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 61
+      "LineNumber": 73
     },
     {
       "ID": "TC-CLI-04-01",
@@ -1546,7 +1692,7 @@
       "When": "the user runs \"blueprint trace REQ-001 \u003cdir\u003e\"",
       "Expect": "stdout contains \"COMP-A\" and \"TC-001\", exit code is 0",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 71
+      "LineNumber": 83
     },
     {
       "ID": "TC-CLI-04-02",
@@ -1558,7 +1704,7 @@
       "When": "the user runs \"blueprint trace TC-001 backward \u003cdir\u003e\"",
       "Expect": "stdout contains \"REQ-001\", exit code is 0",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 78
+      "LineNumber": 90
     },
     {
       "ID": "TC-CLI-04-03",
@@ -1570,7 +1716,7 @@
       "When": "the user runs \"blueprint trace REQ-NONE \u003cdir\u003e\"",
       "Expect": "exit code is non-zero",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 84
+      "LineNumber": 96
     },
     {
       "ID": "TC-CLI-05-01",
@@ -1582,7 +1728,7 @@
       "When": "the user runs \"blueprint verify \u003cdir\u003e\"",
       "Expect": "stdout contains a percentage and the coverage summary line",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 92
+      "LineNumber": 104
     },
     {
       "ID": "TC-CLI-05-02",
@@ -1594,7 +1740,7 @@
       "When": "the user runs \"blueprint verify \u003cdir\u003e\"",
       "Expect": "stdout lists the uncovered requirement id, exit code is non-zero",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 99
+      "LineNumber": 111
     },
     {
       "ID": "TC-CLI-05-03",
@@ -1606,7 +1752,7 @@
       "When": "the user runs \"blueprint verify \u003cdir\u003e\"",
       "Expect": "exit code is 0",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 106
+      "LineNumber": 118
     },
     {
       "ID": "TC-CLI-06-01",
@@ -1618,7 +1764,7 @@
       "When": "the user runs \"blueprint validate ./custom/sys\"",
       "Expect": "the CLI parses that directory (not the default sys/) and exits 0",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 115
+      "LineNumber": 127
     },
     {
       "ID": "TC-CLI-06-02",
@@ -1630,7 +1776,7 @@
       "When": "the user runs \"blueprint validate\" with no path",
       "Expect": "the CLI reads from \"sys\" relative to the working directory and exits 0",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 122
+      "LineNumber": 134
     },
     {
       "ID": "TC-CLI-06-03",
@@ -1642,7 +1788,7 @@
       "When": "",
       "Expect": "stderr contains \"usage\" or \"unknown command\", exit code is non-zero",
       "SourceFile": "sys/components/cli/cli.testspec",
-      "LineNumber": 129
+      "LineNumber": 141
     },
     {
       "ID": "TC-CA01-01",
@@ -2843,6 +2989,162 @@
       "Expect": "ValidationResult.valid: true and errors list is empty",
       "SourceFile": "sys/components/validator/validator.testspec",
       "LineNumber": 146
+    },
+    {
+      "ID": "TC-VIS-01-01",
+      "Title": "GET /api/model returns the parsed model",
+      "Verifies": [
+        "BP-009-VIS-01"
+      ],
+      "Given": "a SystemModel with components, requirements, interfaces, and test specs",
+      "When": "GET /api/model is requested from the running server",
+      "Expect": "status 200 and a JSON body whose top-level keys include \"components\", \"requirements\", \"interfaces\", and \"test_specs\", each a list populated from the model",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 3
+    },
+    {
+      "ID": "TC-VIS-01-02",
+      "Title": "Counts match the parsed model",
+      "Verifies": [
+        "BP-009-VIS-01"
+      ],
+      "Given": "a SystemModel with 2 components and 3 requirements",
+      "When": "GET /api/model is requested",
+      "Expect": "the decoded JSON has 2 entries in \"components\" and 3 entries in \"requirements\"",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 13
+    },
+    {
+      "ID": "TC-VIS-02-01",
+      "Title": "Root path serves the canvas page",
+      "Verifies": [
+        "BP-009-VIS-02"
+      ],
+      "Given": "the server is running",
+      "When": "GET / is requested",
+      "Expect": "status 200 and the response body is an HTML document that loads the canvas application",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 22
+    },
+    {
+      "ID": "TC-VIS-03-01",
+      "Title": "Clicking a component opens the detail pane",
+      "Verifies": [
+        "BP-009-VIS-03"
+      ],
+      "Given": "the top-level canvas is displayed with at least one component node",
+      "When": "the user clicks that component node",
+      "Expect": "a detail pane is visible alongside the canvas and its header shows the clicked component's id and name",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 31
+    },
+    {
+      "ID": "TC-VIS-03-02",
+      "Title": "Clicking the canvas background closes the pane",
+      "Verifies": [
+        "BP-009-VIS-03"
+      ],
+      "Given": "the detail pane is open for some component",
+      "When": "the user clicks an empty area of the top canvas",
+      "Expect": "the detail pane is closed",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 40
+    },
+    {
+      "ID": "TC-VIS-04-01",
+      "Title": "List view is the default representation",
+      "Verifies": [
+        "BP-009-VIS-04"
+      ],
+      "Given": "the user has just opened the detail pane for a component",
+      "When": "",
+      "Expect": "the pane initially displays the list view",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 48
+    },
+    {
+      "ID": "TC-VIS-04-02",
+      "Title": "Toggle switches to canvas view",
+      "Verifies": [
+        "BP-009-VIS-04"
+      ],
+      "Given": "the detail pane is showing the list view",
+      "When": "the user activates the canvas toggle",
+      "Expect": "the pane displays the canvas view for the same component without closing the pane",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 54
+    },
+    {
+      "ID": "TC-VIS-05-01",
+      "Title": "Derived reqs render with their testspecs nested",
+      "Verifies": [
+        "BP-009-VIS-05"
+      ],
+      "Given": "the detail pane is showing the list view for a component that has derived requirements, each with at least one verifying test spec",
+      "When": "",
+      "Expect": "each derived requirement is rendered with its verifying test specs visually grouped below it",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 63
+    },
+    {
+      "ID": "TC-VIS-05-02",
+      "Title": "Component with no derived reqs shows empty state",
+      "Verifies": [
+        "BP-009-VIS-05"
+      ],
+      "Given": "a component with no derived requirements",
+      "When": "the user opens its detail pane in list view",
+      "Expect": "the list view renders an empty-state message instead of an empty section",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 71
+    },
+    {
+      "ID": "TC-VIS-06-01",
+      "Title": "Canvas view includes the component and its neighbors",
+      "Verifies": [
+        "BP-009-VIS-06"
+      ],
+      "Given": "the detail pane is toggled to canvas view for a component that has derived reqs, satisfied sysreqs, and verifying test specs",
+      "When": "",
+      "Expect": "the sub-canvas renders nodes for the component, its derived requirements, its verifying test specs, and the system requirements it satisfies",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 80
+    },
+    {
+      "ID": "TC-VIS-07-01",
+      "Title": "Source path and line appear for selected element",
+      "Verifies": [
+        "BP-009-VIS-07"
+      ],
+      "Given": "the detail pane is showing any element (component, requirement, or test spec)",
+      "When": "",
+      "Expect": "the element's source_file path and line_number are visible in the pane",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 91
+    },
+    {
+      "ID": "TC-VIS-08-01",
+      "Title": "Server binds and serves on the configured port",
+      "Verifies": [
+        "BP-009-VIS-08"
+      ],
+      "Given": "the server is instructed to listen on a free port",
+      "When": "the server is started",
+      "Expect": "the server accepts GET /api/model on that port and returns the JSON model",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 100
+    },
+    {
+      "ID": "TC-VIS-08-02",
+      "Title": "Default port is 8080",
+      "Verifies": [
+        "BP-009-VIS-08"
+      ],
+      "Given": "Serve is invoked with no port override",
+      "When": "the server is initialised",
+      "Expect": "the listen address resolves to :8080",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 107
     },
     {
       "ID": "TC-SYS-001",

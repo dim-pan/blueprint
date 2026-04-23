@@ -90,8 +90,8 @@ func TestTC_VIS_02_01_RootServesCanvas(t *testing.T) {
 	}
 }
 
-// TC-VIS-05-01
-func TestTC_VIS_05_01_ServesOnConfiguredPort(t *testing.T) {
+// TC-VIS-08-01
+func TestTC_VIS_08_01_ServesOnConfiguredPort(t *testing.T) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -122,8 +122,8 @@ func TestTC_VIS_05_01_ServesOnConfiguredPort(t *testing.T) {
 	}
 }
 
-// TC-VIS-05-02
-func TestTC_VIS_05_02_DefaultPort(t *testing.T) {
+// TC-VIS-08-02
+func TestTC_VIS_08_02_DefaultPort(t *testing.T) {
 	if DefaultPort != 8080 {
 		t.Fatalf("DefaultPort = %d, want 8080", DefaultPort)
 	}

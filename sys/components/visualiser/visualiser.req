@@ -8,34 +8,60 @@ req BP-009-VIS-01 "Serve model as JSON"
   interfaces, and test specifications parsed from the
   model directory.
 
-req BP-009-VIS-02 "Render graph in browser canvas"
+req BP-009-VIS-02 "Top-level overview canvas"
   derived_from: BP-009
   allocated_to: COMP-008
   priority: must-have
   WHEN the user opens the served page in a browser,
   the Visualiser shall display components and system
-  requirements as draggable nodes on a pan-and-zoom
-  canvas with satisfy and depends_on edges between them.
+  requirements as nodes on a pan-and-zoom canvas,
+  connected by satisfy and depends_on edges.
 
-req BP-009-VIS-03 "Layer toggles reveal derived reqs and test specs"
+req BP-009-VIS-03 "Component detail pane on click"
   derived_from: BP-009
   allocated_to: COMP-008
   priority: must-have
-  WHILE the canvas is displayed,
-  the user shall be able to toggle visibility of derived
-  requirements and test specifications without reloading
-  the page.
+  WHEN the user clicks a component node in the top
+  canvas, the Visualiser shall open a detail pane
+  alongside the canvas showing that component's scope.
 
-req BP-009-VIS-04 "Select node reveals source details"
+req BP-009-VIS-04 "Detail pane toggles list and canvas views"
   derived_from: BP-009
   allocated_to: COMP-008
   priority: must-have
-  WHEN the user clicks a node in the canvas,
-  the Visualiser shall display the selected element's id,
-  title, source file path, and source line number in a
-  side panel.
+  WHILE the component detail pane is open,
+  the user shall be able to toggle between a list
+  representation and a local canvas representation
+  of the component's scope.
 
-req BP-009-VIS-05 "Single-port local server"
+req BP-009-VIS-05 "List view groups derived reqs with test specs"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: must-have
+  WHEN the list view is active in the detail pane,
+  the Visualiser shall display the component's derived
+  requirements with each requirement's verifying test
+  specifications nested below it.
+
+req BP-009-VIS-06 "Canvas view shows component local subgraph"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: should-have
+  WHEN the canvas view is active in the detail pane,
+  the Visualiser shall render a graph containing the
+  component, its derived requirements, its verifying
+  test specifications, and the system requirements
+  it satisfies.
+
+req BP-009-VIS-07 "Source file and line visible for elements"
+  derived_from: BP-009
+  allocated_to: COMP-008
+  priority: must-have
+  WHEN the user selects any model element in the
+  Visualiser, its source file path and line number
+  shall be displayed in the user interface.
+
+req BP-009-VIS-08 "Single-port local server"
   derived_from: BP-009
   allocated_to: COMP-008
   priority: must-have

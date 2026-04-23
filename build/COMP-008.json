@@ -1,0 +1,749 @@
+{
+  "component": {
+    "ID": "COMP-008",
+    "Name": "Visualiser",
+    "Responsibility": "Present the system model as an interactive node-and-edge graph in a local browser canvas. Serve a locally-hosted page that renders components, requirements, interfaces, and test specifications together with their satisfy, verify, derive, and depends_on relationships. Read-only: no edits flow back from the UI.",
+    "DependsOn": [
+      "COMP-001",
+      "COMP-004"
+    ],
+    "Satisfies": [
+      "BP-009"
+    ],
+    "SourceFile": "sys/components/visualiser/visualiser.component",
+    "LineNumber": 1
+  },
+  "interfaces": [
+    {
+      "Name": "AgentContext",
+      "Fields": [
+        {
+          "Name": "component",
+          "Type": "Component",
+          "Optional": false
+        },
+        {
+          "Name": "interfaces",
+          "Type": "InterfaceDefinition[]",
+          "Optional": false
+        },
+        {
+          "Name": "requirements",
+          "Type": "Requirement[]",
+          "Optional": false
+        },
+        {
+          "Name": "test_specs",
+          "Type": "TestSpec[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/agent-context.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "ChangeSet",
+      "Fields": [
+        {
+          "Name": "affected_components",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "changes",
+          "Type": "Change[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/change-set.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "Change",
+      "Fields": [
+        {
+          "Name": "file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "element_id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "change_type",
+          "Type": "added | modified | removed",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/change-set.iface",
+      "LineNumber": 6
+    },
+    {
+      "Name": "CoverageReport",
+      "Fields": [
+        {
+          "Name": "total_requirements",
+          "Type": "Integer",
+          "Optional": false
+        },
+        {
+          "Name": "covered_requirements",
+          "Type": "Integer",
+          "Optional": false
+        },
+        {
+          "Name": "uncovered_requirements",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "unallocated_requirements",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "coverage_percentage",
+          "Type": "Float",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/coverage-report.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "Requirement",
+      "Fields": [
+        {
+          "Name": "id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "title",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "priority",
+          "Type": "must-have | should-have | nice-to-have",
+          "Optional": false
+        },
+        {
+          "Name": "pattern",
+          "Type": "ubiquitous | event-driven | unwanted | state-driven | optional",
+          "Optional": false
+        },
+        {
+          "Name": "statement",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "accept",
+          "Type": "AcceptanceCriterion[]",
+          "Optional": false
+        },
+        {
+          "Name": "derived_from",
+          "Type": "String",
+          "Optional": true
+        },
+        {
+          "Name": "allocated_to",
+          "Type": "String",
+          "Optional": true
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "AcceptanceCriterion",
+      "Fields": [
+        {
+          "Name": "description",
+          "Type": "String",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 14
+    },
+    {
+      "Name": "Component",
+      "Fields": [
+        {
+          "Name": "id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "name",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "responsibility",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "depends_on",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "satisfies",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 18
+    },
+    {
+      "Name": "InterfaceDefinition",
+      "Fields": [
+        {
+          "Name": "name",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "fields",
+          "Type": "Field[]",
+          "Optional": false
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 28
+    },
+    {
+      "Name": "Field",
+      "Fields": [
+        {
+          "Name": "name",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "type",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "optional",
+          "Type": "Boolean",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 35
+    },
+    {
+      "Name": "TestSpec",
+      "Fields": [
+        {
+          "Name": "id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "title",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "verifies",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "given",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "when",
+          "Type": "String",
+          "Optional": true
+        },
+        {
+          "Name": "expect",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/model-elements.iface",
+      "LineNumber": 41
+    },
+    {
+      "Name": "SystemModel",
+      "Fields": [
+        {
+          "Name": "requirements",
+          "Type": "Requirement[]",
+          "Optional": false
+        },
+        {
+          "Name": "components",
+          "Type": "Component[]",
+          "Optional": false
+        },
+        {
+          "Name": "interfaces",
+          "Type": "InterfaceDefinition[]",
+          "Optional": false
+        },
+        {
+          "Name": "test_specs",
+          "Type": "TestSpec[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/system-model.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "TraceChain",
+      "Fields": [
+        {
+          "Name": "requirement_id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "satisfied_by",
+          "Type": "String[]",
+          "Optional": false
+        },
+        {
+          "Name": "verified_by",
+          "Type": "String[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/trace-chain.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "TraceQuery",
+      "Fields": [
+        {
+          "Name": "from_id",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "direction",
+          "Type": "forward | backward",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/trace-chain.iface",
+      "LineNumber": 7
+    },
+    {
+      "Name": "TraceResult",
+      "Fields": [
+        {
+          "Name": "chains",
+          "Type": "TraceChain[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/trace-chain.iface",
+      "LineNumber": 12
+    },
+    {
+      "Name": "ValidationResult",
+      "Fields": [
+        {
+          "Name": "valid",
+          "Type": "Boolean",
+          "Optional": false
+        },
+        {
+          "Name": "errors",
+          "Type": "ValidationError[]",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/validation-result.iface",
+      "LineNumber": 1
+    },
+    {
+      "Name": "ValidationError",
+      "Fields": [
+        {
+          "Name": "message",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "source_file",
+          "Type": "String",
+          "Optional": false
+        },
+        {
+          "Name": "line_number",
+          "Type": "Integer",
+          "Optional": false
+        },
+        {
+          "Name": "severity",
+          "Type": "error | warning",
+          "Optional": false
+        }
+      ],
+      "SourceFile": "sys/interfaces/validation-result.iface",
+      "LineNumber": 6
+    }
+  ],
+  "requirements": [
+    {
+      "ID": "BP-009-VIS-01",
+      "Title": "Serve model as JSON",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the visualiser is serving a system model, the HTTP endpoint GET /api/model shall return a JSON document containing all components, requirements, interfaces, and test specifications parsed from the model directory.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 1
+    },
+    {
+      "ID": "BP-009",
+      "Title": "Visual model representation",
+      "Priority": "should-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user requests a visual view of the system model, the system shall display the components, their dependencies, interfaces, and traceability links in a graphical format.",
+      "Accept": [],
+      "DerivedFrom": "",
+      "AllocatedTo": "",
+      "SourceFile": "sys/requirements/blueprint.req",
+      "LineNumber": 48
+    },
+    {
+      "ID": "BP-009-VIS-02",
+      "Title": "Top-level overview canvas",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user opens the served page in a browser, the Visualiser shall display components and system requirements as nodes on a pan-and-zoom canvas, connected by satisfy and depends_on edges.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 11
+    },
+    {
+      "ID": "BP-009-VIS-03",
+      "Title": "Component detail pane on click",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user clicks a component node in the top canvas, the Visualiser shall open a detail pane alongside the canvas showing that component's scope.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 20
+    },
+    {
+      "ID": "BP-009-VIS-04",
+      "Title": "Detail pane toggles list and canvas views",
+      "Priority": "must-have",
+      "Pattern": "state-driven",
+      "Statement": "WHILE the component detail pane is open, the user shall be able to toggle between a list representation and a local canvas representation of the component's scope.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 28
+    },
+    {
+      "ID": "BP-009-VIS-05",
+      "Title": "List view groups derived reqs with test specs",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the list view is active in the detail pane, the Visualiser shall display the component's derived requirements with each requirement's verifying test specifications nested below it.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 37
+    },
+    {
+      "ID": "BP-009-VIS-06",
+      "Title": "Canvas view shows component local subgraph",
+      "Priority": "should-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the canvas view is active in the detail pane, the Visualiser shall render a graph containing the component, its derived requirements, its verifying test specifications, and the system requirements it satisfies.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 46
+    },
+    {
+      "ID": "BP-009-VIS-07",
+      "Title": "Source file and line visible for elements",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the user selects any model element in the Visualiser, its source file path and line number shall be displayed in the user interface.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 56
+    },
+    {
+      "ID": "BP-009-VIS-08",
+      "Title": "Single-port local server",
+      "Priority": "must-have",
+      "Pattern": "event-driven",
+      "Statement": "WHEN the serve command is invoked, the Visualiser shall listen on a local TCP port (default 8080) and print the served URL to stdout.",
+      "Accept": [],
+      "DerivedFrom": "BP-009",
+      "AllocatedTo": "COMP-008",
+      "SourceFile": "sys/components/visualiser/visualiser.req",
+      "LineNumber": 64
+    }
+  ],
+  "test_specs": [
+    {
+      "ID": "TC-VIS-01-01",
+      "Title": "GET /api/model returns the parsed model",
+      "Verifies": [
+        "BP-009-VIS-01"
+      ],
+      "Given": "a SystemModel with components, requirements, interfaces, and test specs",
+      "When": "GET /api/model is requested from the running server",
+      "Expect": "status 200 and a JSON body whose top-level keys include \"components\", \"requirements\", \"interfaces\", and \"test_specs\", each a list populated from the model",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 3
+    },
+    {
+      "ID": "TC-VIS-01-02",
+      "Title": "Counts match the parsed model",
+      "Verifies": [
+        "BP-009-VIS-01"
+      ],
+      "Given": "a SystemModel with 2 components and 3 requirements",
+      "When": "GET /api/model is requested",
+      "Expect": "the decoded JSON has 2 entries in \"components\" and 3 entries in \"requirements\"",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 13
+    },
+    {
+      "ID": "TC-VIS-02-01",
+      "Title": "Root path serves the canvas page",
+      "Verifies": [
+        "BP-009-VIS-02"
+      ],
+      "Given": "the server is running",
+      "When": "GET / is requested",
+      "Expect": "status 200 and the response body is an HTML document that loads the canvas application",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 22
+    },
+    {
+      "ID": "TC-VIS-03-01",
+      "Title": "Clicking a component opens the detail pane",
+      "Verifies": [
+        "BP-009-VIS-03"
+      ],
+      "Given": "the top-level canvas is displayed with at least one component node",
+      "When": "the user clicks that component node",
+      "Expect": "a detail pane is visible alongside the canvas and its header shows the clicked component's id and name",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 31
+    },
+    {
+      "ID": "TC-VIS-03-02",
+      "Title": "Clicking the canvas background closes the pane",
+      "Verifies": [
+        "BP-009-VIS-03"
+      ],
+      "Given": "the detail pane is open for some component",
+      "When": "the user clicks an empty area of the top canvas",
+      "Expect": "the detail pane is closed",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 40
+    },
+    {
+      "ID": "TC-VIS-04-01",
+      "Title": "List view is the default representation",
+      "Verifies": [
+        "BP-009-VIS-04"
+      ],
+      "Given": "the user has just opened the detail pane for a component",
+      "When": "",
+      "Expect": "the pane initially displays the list view",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 48
+    },
+    {
+      "ID": "TC-VIS-04-02",
+      "Title": "Toggle switches to canvas view",
+      "Verifies": [
+        "BP-009-VIS-04"
+      ],
+      "Given": "the detail pane is showing the list view",
+      "When": "the user activates the canvas toggle",
+      "Expect": "the pane displays the canvas view for the same component without closing the pane",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 54
+    },
+    {
+      "ID": "TC-VIS-05-01",
+      "Title": "Derived reqs render with their testspecs nested",
+      "Verifies": [
+        "BP-009-VIS-05"
+      ],
+      "Given": "the detail pane is showing the list view for a component that has derived requirements, each with at least one verifying test spec",
+      "When": "",
+      "Expect": "each derived requirement is rendered with its verifying test specs visually grouped below it",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 63
+    },
+    {
+      "ID": "TC-VIS-05-02",
+      "Title": "Component with no derived reqs shows empty state",
+      "Verifies": [
+        "BP-009-VIS-05"
+      ],
+      "Given": "a component with no derived requirements",
+      "When": "the user opens its detail pane in list view",
+      "Expect": "the list view renders an empty-state message instead of an empty section",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 71
+    },
+    {
+      "ID": "TC-VIS-06-01",
+      "Title": "Canvas view includes the component and its neighbors",
+      "Verifies": [
+        "BP-009-VIS-06"
+      ],
+      "Given": "the detail pane is toggled to canvas view for a component that has derived reqs, satisfied sysreqs, and verifying test specs",
+      "When": "",
+      "Expect": "the sub-canvas renders nodes for the component, its derived requirements, its verifying test specs, and the system requirements it satisfies",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 80
+    },
+    {
+      "ID": "TC-VIS-07-01",
+      "Title": "Source path and line appear for selected element",
+      "Verifies": [
+        "BP-009-VIS-07"
+      ],
+      "Given": "the detail pane is showing any element (component, requirement, or test spec)",
+      "When": "",
+      "Expect": "the element's source_file path and line_number are visible in the pane",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 91
+    },
+    {
+      "ID": "TC-VIS-08-01",
+      "Title": "Server binds and serves on the configured port",
+      "Verifies": [
+        "BP-009-VIS-08"
+      ],
+      "Given": "the server is instructed to listen on a free port",
+      "When": "the server is started",
+      "Expect": "the server accepts GET /api/model on that port and returns the JSON model",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 100
+    },
+    {
+      "ID": "TC-VIS-08-02",
+      "Title": "Default port is 8080",
+      "Verifies": [
+        "BP-009-VIS-08"
+      ],
+      "Given": "Serve is invoked with no port override",
+      "When": "the server is initialised",
+      "Expect": "the listen address resolves to :8080",
+      "SourceFile": "sys/components/visualiser/visualiser.testspec",
+      "LineNumber": 107
+    },
+    {
+      "ID": "TC-SYS-028",
+      "Title": "Visual output includes all components",
+      "Verifies": [
+        "BP-009"
+      ],
+      "Given": "a SystemModel with 3 components",
+      "When": "visual representation is requested",
+      "Expect": "output contains all 3 components with their names",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 195
+    },
+    {
+      "ID": "TC-SYS-029",
+      "Title": "Visual output shows dependencies",
+      "Verifies": [
+        "BP-009"
+      ],
+      "Given": "COMP-002 depends_on COMP-001",
+      "When": "visual representation is requested",
+      "Expect": "output shows a dependency link from COMP-002 to COMP-001",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 201
+    },
+    {
+      "ID": "TC-SYS-030",
+      "Title": "Visual output shows traceability",
+      "Verifies": [
+        "BP-009"
+      ],
+      "Given": "COMP-001 satisfies REQ-001, TC-001 verifies REQ-001",
+      "When": "visual representation is requested",
+      "Expect": "output shows satisfy and verify links",
+      "SourceFile": "sys/tests/blueprint.testspec",
+      "LineNumber": 208
+    }
+  ]
+}

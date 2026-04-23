@@ -17,7 +17,7 @@ test TC-VIS-01-02 "Counts match the parsed model"
   expect: the decoded JSON has 2 entries in "components"
           and 3 entries in "requirements"
 
-## BP-009-VIS-02: Render graph in browser canvas
+## BP-009-VIS-02: Top-level overview canvas
 
 test TC-VIS-02-01 "Root path serves the canvas page"
   verifies: BP-009-VIS-02
@@ -26,17 +26,86 @@ test TC-VIS-02-01 "Root path serves the canvas page"
   expect: status 200 and the response body is an HTML
           document that loads the canvas application
 
-## BP-009-VIS-05: Single-port local server
+## BP-009-VIS-03: Component detail pane on click
 
-test TC-VIS-05-01 "Server binds and serves on the configured port"
+test TC-VIS-03-01 "Clicking a component opens the detail pane"
+  verifies: BP-009-VIS-03
+  given: the top-level canvas is displayed with at least
+         one component node
+  when: the user clicks that component node
+  expect: a detail pane is visible alongside the canvas
+          and its header shows the clicked component's
+          id and name
+
+test TC-VIS-03-02 "Clicking the canvas background closes the pane"
+  verifies: BP-009-VIS-03
+  given: the detail pane is open for some component
+  when: the user clicks an empty area of the top canvas
+  expect: the detail pane is closed
+
+## BP-009-VIS-04: Detail pane toggles list and canvas views
+
+test TC-VIS-04-01 "List view is the default representation"
+  verifies: BP-009-VIS-04
+  given: the user has just opened the detail pane for a
+         component
+  expect: the pane initially displays the list view
+
+test TC-VIS-04-02 "Toggle switches to canvas view"
+  verifies: BP-009-VIS-04
+  given: the detail pane is showing the list view
+  when: the user activates the canvas toggle
+  expect: the pane displays the canvas view for the
+          same component without closing the pane
+
+## BP-009-VIS-05: List view groups derived reqs with test specs
+
+test TC-VIS-05-01 "Derived reqs render with their testspecs nested"
   verifies: BP-009-VIS-05
+  given: the detail pane is showing the list view for a
+         component that has derived requirements, each
+         with at least one verifying test spec
+  expect: each derived requirement is rendered with its
+          verifying test specs visually grouped below it
+
+test TC-VIS-05-02 "Component with no derived reqs shows empty state"
+  verifies: BP-009-VIS-05
+  given: a component with no derived requirements
+  when: the user opens its detail pane in list view
+  expect: the list view renders an empty-state message
+          instead of an empty section
+
+## BP-009-VIS-06: Canvas view shows component local subgraph
+
+test TC-VIS-06-01 "Canvas view includes the component and its neighbors"
+  verifies: BP-009-VIS-06
+  given: the detail pane is toggled to canvas view for a
+         component that has derived reqs, satisfied sysreqs,
+         and verifying test specs
+  expect: the sub-canvas renders nodes for the component,
+          its derived requirements, its verifying test
+          specs, and the system requirements it satisfies
+
+## BP-009-VIS-07: Source file and line visible for elements
+
+test TC-VIS-07-01 "Source path and line appear for selected element"
+  verifies: BP-009-VIS-07
+  given: the detail pane is showing any element (component,
+         requirement, or test spec)
+  expect: the element's source_file path and line_number
+          are visible in the pane
+
+## BP-009-VIS-08: Single-port local server
+
+test TC-VIS-08-01 "Server binds and serves on the configured port"
+  verifies: BP-009-VIS-08
   given: the server is instructed to listen on a free port
   when: the server is started
   expect: the server accepts GET /api/model on that port
           and returns the JSON model
 
-test TC-VIS-05-02 "Default port is 8080"
-  verifies: BP-009-VIS-05
+test TC-VIS-08-02 "Default port is 8080"
+  verifies: BP-009-VIS-08
   given: Serve is invoked with no port override
   when: the server is initialised
   expect: the listen address resolves to :8080

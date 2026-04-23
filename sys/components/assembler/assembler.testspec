@@ -1,0 +1,98 @@
+## BP-004-A01: Assemble component context
+
+test TC-A01-01 "Context includes the component definition"
+  verifies: BP-004-A01
+  given: a SystemModel with component COMP-001
+  when: Assemble is called
+  expect: the AgentContext for COMP-001 has a component field
+          whose id is "COMP-001"
+
+test TC-A01-02 "Context includes allocated derived requirements"
+  verifies: BP-004-A01
+  given: REQ-A-01 has allocated_to COMP-001 and REQ-B-01 has
+         allocated_to COMP-002
+  when: Assemble is called
+  expect: AgentContext for COMP-001 contains REQ-A-01 but not
+          REQ-B-01 in its requirements list
+
+test TC-A01-03 "Context includes verifying test specs"
+  verifies: BP-004-A01
+  given: TC-001 verifies REQ-A-01 which is allocated_to COMP-001,
+         and TC-002 verifies REQ-B-01 which is allocated_to COMP-002
+  when: Assemble is called
+  expect: AgentContext for COMP-001 contains TC-001 but not TC-002
+
+test TC-A01-04 "One context per component"
+  verifies: BP-004-A01
+  given: a SystemModel with three components
+  when: Assemble is called
+  expect: the returned list has three AgentContexts, one per
+          component, indexed by component id
+
+## BP-004-A02: Resolve interface references
+
+test TC-A02-01 "Interfaces list is populated"
+  verifies: BP-004-A02
+  given: a SystemModel with two interface definitions
+  when: Assemble is called
+  expect: each AgentContext's interfaces list contains both
+          definitions
+
+test TC-A02-02 "Every referenced interface type is present"
+  verifies: BP-004-A02
+  given: a component whose requirements reference interface
+         names that exist in the model
+  when: Assemble is called
+  expect: every referenced interface name in the context's
+          requirements resolves to a full InterfaceDefinition
+          in the same context
+
+## BP-004-A03: Include system requirement intent
+
+test TC-A03-01 "Parent system requirements accompany derived requirements"
+  verifies: BP-004-A03
+  given: REQ-001 is a system-level requirement and REQ-001-A
+         derives from it with allocated_to COMP-001
+  when: Assemble is called
+  expect: AgentContext for COMP-001 contains both REQ-001-A
+          and REQ-001
+
+test TC-A03-02 "System requirements listed in satisfies are included"
+  verifies: BP-004-A03
+  given: COMP-001 has satisfies: REQ-001 and REQ-001 has no
+         derived requirements yet
+  when: Assemble is called
+  expect: AgentContext for COMP-001 contains REQ-001
+
+test TC-A03-03 "Parent requirement included only once when multiple derived reqs share it"
+  verifies: BP-004-A03
+  given: REQ-001 has two derived requirements both allocated to
+         COMP-001
+  when: Assemble is called
+  expect: AgentContext for COMP-001 contains REQ-001 exactly
+          once in its requirements list
+
+## BP-008-A01: Assemble only affected components
+
+test TC-A08-01 "AssembleOnly returns only the listed components"
+  verifies: BP-008-A01
+  given: a SystemModel with three components A, B, C and the
+         affected list is ["A", "C"]
+  when: AssembleOnly is called
+  expect: the returned list contains AgentContexts for A and C
+          only, with B omitted
+
+test TC-A08-02 "AssembleOnly with empty list returns empty"
+  verifies: BP-008-A01
+  given: a SystemModel with three components and an empty
+         affected list
+  when: AssembleOnly is called
+  expect: the returned list is empty
+
+test TC-A08-03 "AssembleOnly ignores unknown component ids"
+  verifies: BP-008-A01
+  given: a SystemModel with components A and B, and the
+         affected list is ["A", "UNKNOWN"]
+  when: AssembleOnly is called
+  expect: the returned list contains only the AgentContext
+          for A, and no error occurs

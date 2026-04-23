@@ -22,6 +22,50 @@ test TC-CLI-01-03 "Parse error prints file path and exits non-zero"
   expect: output contains the offending file name and exit code
           is non-zero
 
+## BP-CLI-02: Assemble command
+
+test TC-CLI-02-01 "Assemble writes one JSON file per component"
+  verifies: BP-CLI-02
+  given: a valid model directory with three components and an
+         empty output directory
+  when: the user runs "blueprint assemble <sys-dir> <out-dir>"
+  expect: three <component-id>.json files exist under the
+          output directory, exit code is 0
+
+test TC-CLI-02-02 "Assemble refuses when model is invalid"
+  verifies: BP-CLI-02
+  given: a model directory whose parsed SystemModel has a
+         validation error
+  when: the user runs "blueprint assemble <sys-dir> <out-dir>"
+  expect: no files are written, exit code is non-zero,
+          stderr mentions the validation error
+
+## BP-CLI-03: Sync command
+
+test TC-CLI-03-01 "Sync with no baseline writes everything and saves baseline"
+  verifies: BP-CLI-03
+  given: a valid model directory and no existing baseline file
+  when: the user runs "blueprint sync <sys-dir> <out-dir>" from
+        a working directory with no .blueprint/baseline.json
+  expect: AgentContext files are written for every component,
+          a .blueprint/baseline.json is created, and exit
+          code is 0
+
+test TC-CLI-03-02 "Sync with unchanged model writes nothing new"
+  verifies: BP-CLI-03
+  given: a baseline that matches the current model
+  when: the user runs "blueprint sync" again
+  expect: stdout reports no changes, no files are regenerated,
+          exit code is 0
+
+test TC-CLI-03-03 "Sync regenerates only affected components"
+  verifies: BP-CLI-03
+  given: a baseline and a current model where only one component
+         has changed
+  when: the user runs "blueprint sync <sys-dir> <out-dir>"
+  expect: only the affected component's AgentContext is written
+          and the baseline is updated, exit code is 0
+
 ## BP-CLI-04: Trace command
 
 test TC-CLI-04-01 "Forward trace prints satisfied_by and verified_by"

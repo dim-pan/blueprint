@@ -1,0 +1,128 @@
+## BP-007-CD01: Detect added elements
+
+test TC-CD01-01 "Added requirement appears in changes"
+  verifies: BP-007-CD01
+  given: a baseline with no requirements and a current model
+         containing REQ-001
+  when: DetectBetween is called
+  expect: the ChangeSet contains a Change with element_id
+          "REQ-001" and change_type "added"
+
+test TC-CD01-02 "Added component appears in changes"
+  verifies: BP-007-CD01
+  given: a baseline with no components and a current model
+         containing COMP-001
+  when: DetectBetween is called
+  expect: a Change with element_id "COMP-001" and change_type "added"
+
+test TC-CD01-03 "Added interface and test spec appear in changes"
+  verifies: BP-007-CD01
+  given: a current model adding interface Todo and test TC-001
+         that are absent from the baseline
+  when: DetectBetween is called
+  expect: the ChangeSet contains Change entries for both "Todo"
+          and "TC-001" with change_type "added"
+
+## BP-007-CD02: Detect modified elements
+
+test TC-CD02-01 "Changed requirement statement is modified"
+  verifies: BP-007-CD02
+  given: a baseline where REQ-001 has statement "X" and a
+         current model where REQ-001 has statement "Y"
+  when: DetectBetween is called
+  expect: a Change with element_id "REQ-001" and change_type
+          "modified"
+
+test TC-CD02-02 "Source file or line number change alone is not modified"
+  verifies: BP-007-CD02
+  given: a baseline and current model that are identical
+         except for source_file and line_number fields
+  when: DetectBetween is called
+  expect: the ChangeSet has no modified changes for those
+          elements
+
+test TC-CD02-03 "Identical models produce an empty change set"
+  verifies: BP-007-CD02
+  given: a baseline and current model that are semantically
+         identical
+  when: DetectBetween is called
+  expect: the ChangeSet has no changes and affected_components
+          is empty
+
+## BP-007-CD03: Detect removed elements
+
+test TC-CD03-01 "Removed requirement appears in changes"
+  verifies: BP-007-CD03
+  given: a baseline containing REQ-001 and a current model
+         that does not contain it
+  when: DetectBetween is called
+  expect: a Change with element_id "REQ-001" and change_type
+          "removed"
+
+test TC-CD03-02 "Removed component appears in changes"
+  verifies: BP-007-CD03
+  given: a baseline with COMP-001 and a current model that
+         does not contain it
+  when: DetectBetween is called
+  expect: a Change with element_id "COMP-001" and change_type
+          "removed"
+
+## BP-007-CD04: Identify affected components
+
+test TC-CD04-01 "Directly changed component is affected"
+  verifies: BP-007-CD04
+  given: COMP-001 exists in both baseline and current but its
+         responsibility text differs
+  when: DetectBetween is called
+  expect: affected_components includes "COMP-001"
+
+test TC-CD04-02 "Component allocated to a changed requirement is affected"
+  verifies: BP-007-CD04
+  given: REQ-001-A is allocated_to COMP-001 and its statement
+         changed between baseline and current
+  when: DetectBetween is called
+  expect: affected_components includes "COMP-001"
+
+test TC-CD04-03 "Component satisfying a changed system requirement is affected"
+  verifies: BP-007-CD04
+  given: COMP-001 has satisfies: REQ-001 and REQ-001 changed
+         between baseline and current
+  when: DetectBetween is called
+  expect: affected_components includes "COMP-001"
+
+test TC-CD04-04 "Component that depends_on an affected component is affected"
+  verifies: BP-007-CD04
+  given: COMP-002 depends_on COMP-001, and COMP-001 is affected
+  when: DetectBetween is called
+  expect: affected_components includes both "COMP-001" and "COMP-002"
+
+test TC-CD04-05 "Component verifying a changed test spec is affected"
+  verifies: BP-007-CD04
+  given: TC-001 verifies REQ-001-A (allocated_to COMP-001) and
+         the test spec's expect text changed
+  when: DetectBetween is called
+  expect: affected_components includes "COMP-001"
+
+test TC-CD04-06 "Interface change marks all components as affected"
+  verifies: BP-007-CD04
+  given: an interface changed between baseline and current
+  when: DetectBetween is called
+  expect: affected_components includes every component in the
+          current model
+
+## BP-007-CD05: Store sync state
+
+test TC-CD05-01 "SaveBaseline writes the current model to disk"
+  verifies: BP-007-CD05
+  given: a SystemModel and a target baseline path
+  when: SaveBaseline is called
+  expect: the file exists at the given path and LoadBaseline
+          returns a SystemModel equivalent to the input
+
+test TC-CD05-02 "Missing baseline is treated as an empty baseline"
+  verifies: BP-007-CD05
+  given: a baseline path that does not exist on disk
+  when: Detect is called with that path and a non-empty
+         current model
+  expect: every element of the current model appears in the
+          change set as "added", with no error

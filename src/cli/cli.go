@@ -1,10 +1,15 @@
 package cli
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 
+	"github.com/dim-pan/blueprint/src/assembler"
+	"github.com/dim-pan/blueprint/src/changedetector"
 	"github.com/dim-pan/blueprint/src/coverage"
 	"github.com/dim-pan/blueprint/src/parser"
 	"github.com/dim-pan/blueprint/src/tracer"
@@ -24,6 +29,13 @@ Commands:
                         Show the traceability chain for a
                         requirement, component, or test spec.
   verify                Report test-coverage and allocation gaps.
+  assemble [output-dir]
+                        Write one AgentContext per component as
+                        JSON under output-dir (default: ./build).
+  sync [output-dir]     Detect changes since the last sync and
+                        write AgentContexts only for affected
+                        components. Baseline is stored under
+                        .blueprint/baseline.json.
 
 If model-dir is omitted, the default is "sys" relative to the
 current working directory.
@@ -42,6 +54,10 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return runTrace(args[1:], stdout, stderr)
 	case "verify":
 		return runVerify(args[1:], stdout, stderr)
+	case "assemble":
+		return runAssemble(args[1:], stdout, stderr)
+	case "sync":
+		return runSync(args[1:], stdout, stderr)
 	case "-h", "--help", "help":
 		fmt.Fprint(stdout, usage)
 		return 0
@@ -163,6 +179,137 @@ func runVerify(args []string, stdout, stderr io.Writer) int {
 	if len(r.UncoveredRequirements)+len(r.UnallocatedRequirements) > 0 {
 		return 1
 	}
+	return 0
+}
+
+const defaultBuildDir = "build"
+const defaultBaselinePath = ".blueprint/baseline.json"
+
+func runAssemble(args []string, stdout, stderr io.Writer) int {
+	sysDir, outDir := defaultSysDir, defaultBuildDir
+	if len(args) >= 1 {
+		sysDir = args[0]
+	}
+	if len(args) >= 2 {
+		outDir = args[1]
+	}
+	if len(args) > 2 {
+		fmt.Fprintln(stderr, "usage: blueprint assemble [sys-dir] [out-dir]")
+		return 2
+	}
+
+	model, err := loadModel(sysDir, stderr)
+	if err != nil {
+		return 1
+	}
+	result := validator.Validate(model)
+	if !result.Valid {
+		fmt.Fprintf(stderr, "refusing to assemble: model has %d validation error(s)\n", len(result.Errors))
+		for _, e := range result.Errors {
+			fmt.Fprintf(stderr, "  %s:%d  %s\n", e.SourceFile, e.LineNumber, e.Message)
+		}
+		return 1
+	}
+
+	if err := os.MkdirAll(outDir, 0o755); err != nil {
+		fmt.Fprintf(stderr, "could not create output dir %q: %s\n", outDir, err)
+		return 1
+	}
+
+	contexts := assembler.Assemble(model)
+	for _, ctx := range contexts {
+		path := filepath.Join(outDir, ctx.Component.ID+".json")
+		data, err := json.MarshalIndent(ctx, "", "  ")
+		if err != nil {
+			fmt.Fprintf(stderr, "failed to marshal %s: %s\n", ctx.Component.ID, err)
+			return 1
+		}
+		if err := os.WriteFile(path, data, 0o644); err != nil {
+			fmt.Fprintf(stderr, "failed to write %s: %s\n", path, err)
+			return 1
+		}
+		fmt.Fprintf(stdout, "wrote %s  (%d reqs, %d test specs, %d interfaces)\n",
+			path, len(ctx.Requirements), len(ctx.TestSpecs), len(ctx.Interfaces))
+	}
+	fmt.Fprintf(stdout, "assembled %d component context(s)\n", len(contexts))
+	return 0
+}
+
+func runSync(args []string, stdout, stderr io.Writer) int {
+	sysDir, outDir := defaultSysDir, defaultBuildDir
+	if len(args) >= 1 {
+		sysDir = args[0]
+	}
+	if len(args) >= 2 {
+		outDir = args[1]
+	}
+	if len(args) > 2 {
+		fmt.Fprintln(stderr, "usage: blueprint sync [sys-dir] [out-dir]")
+		return 2
+	}
+
+	model, err := loadModel(sysDir, stderr)
+	if err != nil {
+		return 1
+	}
+	if result := validator.Validate(model); !result.Valid {
+		fmt.Fprintf(stderr, "refusing to sync: model has %d validation error(s)\n", len(result.Errors))
+		for _, e := range result.Errors {
+			fmt.Fprintf(stderr, "  %s:%d  %s\n", e.SourceFile, e.LineNumber, e.Message)
+		}
+		return 1
+	}
+
+	baselinePath := defaultBaselinePath
+	changes, err := changedetector.Detect(model, baselinePath)
+	if err != nil {
+		fmt.Fprintf(stderr, "detect error: %s\n", err)
+		return 1
+	}
+
+	if len(changes.Changes) == 0 {
+		fmt.Fprintln(stdout, "no changes since last sync")
+		return 0
+	}
+
+	fmt.Fprintf(stdout, "%d change(s):\n", len(changes.Changes))
+	for _, c := range changes.Changes {
+		fmt.Fprintf(stdout, "  %-10s %s  (%s)\n", c.ChangeType, c.ElementID, c.File)
+	}
+
+	if len(changes.AffectedComponents) == 0 {
+		fmt.Fprintln(stdout, "no components require regeneration")
+	} else {
+		if err := os.MkdirAll(outDir, 0o755); err != nil {
+			fmt.Fprintf(stderr, "could not create output dir %q: %s\n", outDir, err)
+			return 1
+		}
+		contexts := assembler.AssembleOnly(model, changes.AffectedComponents)
+		fmt.Fprintf(stdout, "regenerating %d component(s):\n", len(contexts))
+		for _, ctx := range contexts {
+			path := filepath.Join(outDir, ctx.Component.ID+".json")
+			data, err := json.MarshalIndent(ctx, "", "  ")
+			if err != nil {
+				fmt.Fprintf(stderr, "failed to marshal %s: %s\n", ctx.Component.ID, err)
+				return 1
+			}
+			if err := os.WriteFile(path, data, 0o644); err != nil {
+				fmt.Fprintf(stderr, "failed to write %s: %s\n", path, err)
+				return 1
+			}
+			fmt.Fprintf(stdout, "  wrote %s\n", path)
+		}
+	}
+
+	if err := os.MkdirAll(filepath.Dir(baselinePath), 0o755); err != nil {
+		fmt.Fprintf(stderr, "could not create baseline dir: %s\n", err)
+		return 1
+	}
+	if err := changedetector.SaveBaseline(model, baselinePath); err != nil {
+		fmt.Fprintf(stderr, "failed to save baseline: %s\n", err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "baseline saved to %s\n", baselinePath)
 	return 0
 }
 

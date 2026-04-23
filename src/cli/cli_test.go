@@ -224,3 +224,161 @@ func TestTC_CLI_05_03_VerifyZeroWhenClean(t *testing.T) {
 		t.Fatalf("expected 0, got %d; stdout=%s stderr=%s", code, out.String(), errBuf.String())
 	}
 }
+
+// TC-CLI-02-01
+func TestTC_CLI_02_01_AssembleWritesFiles(t *testing.T) {
+	sysDir := t.TempDir()
+	writeFile(t, filepath.Join(sysDir, "requirements/app.req"), `req REQ-001 "X"
+  priority: must-have
+  The system shall X.
+`)
+	writeFile(t, filepath.Join(sysDir, "components/a/a.component"), `component COMP-A "A"
+  responsibility: X.
+  satisfies: REQ-001
+`)
+	writeFile(t, filepath.Join(sysDir, "components/b/b.component"), `component COMP-B "B"
+  responsibility: Y.
+`)
+	writeFile(t, filepath.Join(sysDir, "components/c/c.component"), `component COMP-C "C"
+  responsibility: Z.
+`)
+
+	outDir := filepath.Join(t.TempDir(), "out")
+	var out, errBuf bytes.Buffer
+	code := Run([]string{"assemble", sysDir, outDir}, &out, &errBuf)
+	if code != 0 {
+		t.Fatalf("exit=%d, stderr=%s", code, errBuf.String())
+	}
+	for _, id := range []string{"COMP-A", "COMP-B", "COMP-C"} {
+		p := filepath.Join(outDir, id+".json")
+		if _, err := os.Stat(p); err != nil {
+			t.Fatalf("expected %s, err=%v", p, err)
+		}
+	}
+}
+
+func syncableModel(t *testing.T, dir string) {
+	t.Helper()
+	writeFile(t, filepath.Join(dir, "requirements/app.req"), `req REQ-001 "X"
+  priority: must-have
+  The system shall X.
+`)
+	writeFile(t, filepath.Join(dir, "components/a/a.component"), `component COMP-A "A"
+  responsibility: Do X.
+  satisfies: REQ-001
+`)
+	writeFile(t, filepath.Join(dir, "components/b/b.component"), `component COMP-B "B"
+  responsibility: Do Y.
+`)
+}
+
+func chdirTemp(t *testing.T) string {
+	t.Helper()
+	work := t.TempDir()
+	orig, _ := os.Getwd()
+	t.Cleanup(func() { _ = os.Chdir(orig) })
+	if err := os.Chdir(work); err != nil {
+		t.Fatal(err)
+	}
+	return work
+}
+
+// TC-CLI-03-01
+func TestTC_CLI_03_01_SyncInitial(t *testing.T) {
+	work := chdirTemp(t)
+	sysDir := filepath.Join(work, "sys")
+	syncableModel(t, sysDir)
+
+	outDir := filepath.Join(work, "out")
+	var out, errBuf bytes.Buffer
+	code := Run([]string{"sync", sysDir, outDir}, &out, &errBuf)
+	if code != 0 {
+		t.Fatalf("exit=%d, stderr=%s", code, errBuf.String())
+	}
+	for _, id := range []string{"COMP-A", "COMP-B"} {
+		if _, err := os.Stat(filepath.Join(outDir, id+".json")); err != nil {
+			t.Fatalf("expected %s.json, err=%v", id, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(work, ".blueprint/baseline.json")); err != nil {
+		t.Fatalf("expected baseline file: %v", err)
+	}
+}
+
+// TC-CLI-03-02
+func TestTC_CLI_03_02_SyncNoChanges(t *testing.T) {
+	work := chdirTemp(t)
+	sysDir := filepath.Join(work, "sys")
+	syncableModel(t, sysDir)
+	outDir := filepath.Join(work, "out")
+
+	var out, errBuf bytes.Buffer
+	if code := Run([]string{"sync", sysDir, outDir}, &out, &errBuf); code != 0 {
+		t.Fatalf("first sync failed: %s", errBuf.String())
+	}
+	// NOTE: deliberately leave outDir in place so we exercise the
+	// case where both sys/ and build/ exist on the second invocation.
+	out.Reset()
+	errBuf.Reset()
+	code := Run([]string{"sync", sysDir, outDir}, &out, &errBuf)
+	if code != 0 {
+		t.Fatalf("second sync exit=%d, stderr=%s", code, errBuf.String())
+	}
+	if !strings.Contains(out.String(), "no changes") {
+		t.Fatalf("expected 'no changes' message: %s", out.String())
+	}
+}
+
+// TC-CLI-03-03
+func TestTC_CLI_03_03_SyncAffectedOnly(t *testing.T) {
+	work := chdirTemp(t)
+	sysDir := filepath.Join(work, "sys")
+	syncableModel(t, sysDir)
+	outDir := filepath.Join(work, "out")
+
+	var out, errBuf bytes.Buffer
+	if code := Run([]string{"sync", sysDir, outDir}, &out, &errBuf); code != 0 {
+		t.Fatalf("first sync failed: %s", errBuf.String())
+	}
+	_ = os.RemoveAll(outDir)
+
+	// Modify COMP-B only
+	writeFile(t, filepath.Join(sysDir, "components/b/b.component"), `component COMP-B "B"
+  responsibility: Do Y v2 new behaviour.
+`)
+
+	out.Reset()
+	errBuf.Reset()
+	code := Run([]string{"sync", sysDir, outDir}, &out, &errBuf)
+	if code != 0 {
+		t.Fatalf("exit=%d, stderr=%s", code, errBuf.String())
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "COMP-B.json")); err != nil {
+		t.Fatalf("COMP-B should have been regenerated: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "COMP-A.json")); err == nil {
+		t.Fatalf("COMP-A should not have been regenerated (not affected)")
+	}
+}
+
+// TC-CLI-02-02
+func TestTC_CLI_02_02_AssembleRefusesInvalid(t *testing.T) {
+	sysDir := t.TempDir()
+	writeFile(t, filepath.Join(sysDir, "components/a/a.component"), `component COMP-A "A"
+  responsibility: X.
+  satisfies: REQ-MISSING
+`)
+	outDir := filepath.Join(t.TempDir(), "out")
+
+	var out, errBuf bytes.Buffer
+	code := Run([]string{"assemble", sysDir, outDir}, &out, &errBuf)
+	if code == 0 {
+		t.Fatalf("expected non-zero exit")
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "COMP-A.json")); err == nil {
+		t.Fatalf("no files should be written on invalid model")
+	}
+	if !strings.Contains(errBuf.String(), "REQ-MISSING") {
+		t.Fatalf("stderr missing REQ-MISSING: %s", errBuf.String())
+	}
+}
